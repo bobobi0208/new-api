@@ -4,7 +4,7 @@
 #   1. 在仓库根目录创建 `.env`，至少设置：
 #      - SQL_DSN=mysql-user:mysql-pass@tcp(10.0.0.10:3306)/new-api?charset=utf8mb4&parseTime=True&loc=Local
 #        或 SQL_DSN=postgres://user:pass@10.0.0.10:5432/new-api?sslmode=disable
-#      - REDIS_CONN_STRING=redis://:redis-pass@10.0.0.20:6379/0
+#      - REDIS_CONN_STRING=redis://:redis-pass@10.0.0.20:6379/1
 #   2. 启动时显式指定本文件：
 #      docker compose -f docker-compose.external.yaml up -d
 
