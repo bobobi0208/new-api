@@ -135,3 +135,57 @@ For request structs that are parsed from client JSON and then re-marshaled to up
 ### Rule 7: Billing Expression System — Read `pkg/billingexpr/expr.md`
 
 When working on tiered/dynamic billing (expression-based pricing), you MUST read `pkg/billingexpr/expr.md` first. It documents the design philosophy, expression language (variables, functions, examples), full system architecture (editor → storage → pre-consume → settlement → log display), token normalization rules (`p`/`c` auto-exclusion), quota conversion, and expression versioning. All code changes to the billing expression system must follow the patterns described in that document.
+
+## Branch Conventions
+
+This fork uses three long-lived branches. Each has a fixed role — do not blur them.
+
+| Branch | Role | Tracking |
+|---|---|---|
+| `main` | Mirror of upstream `QuantumNous/new-api`. Kept clean, no fork-specific patches. | `origin/main` |
+| `feat/channel-health-refactor` | Historical snapshot of prior personal work (17 commits on top of a past `main`). Read-only archive; do not commit new work here. | `origin/feat/channel-health-refactor` |
+| `prod/stable` | Production deployment line. Based on `main` plus the minimal fork-specific patches below. Deploy from this branch. | `origin/prod/stable` |
+
+### What `prod/stable` adds on top of `main`
+
+Exactly two commits, minimized to reduce future merge friction:
+
+1. **`chore: carry over deployment configs ...`** — 7 deployment files + legal content asset + ignore rules for local artifacts:
+   - `docker-compose.yaml`, `docker-compose.yml`, `docker-compose.local.yaml`, `docker-compose.external.yaml`, `docker-compose-master.yaml`, `docker-compose-slave.yaml` (all pull `ghcr.io/bobobi0208/new-api:latest`)
+   - `.env.example` (variable names paired with the compose files)
+   - `web/public/omnai-legal.html` (content asset; paste into admin console's Legal settings)
+   - `.gitignore` appended: `.pnpm-store/`, `.tmp/`, `.worktrees/`, `local-logs/`, `local-mysql/`, `local-redis/`
+2. **`feat: require legal consent on register`** — server-side consent enforcement on `/api/user/register`:
+   - Adds `AcceptedUserAgreementAt`, `AcceptedPrivacyPolicyAt`, `AcceptedUsagePolicyAt` (bigint) to `model.User`
+   - Adds `RegisterRequest` DTO in `controller/user.go` and rejects registration if any consent flag is false
+
+### Syncing upstream into `prod/stable`
+
+```bash
+git checkout main
+git pull                                     # sync upstream via origin/main
+git checkout prod/stable
+git merge origin/main                        # resolve small conflicts near compose / user.go only
+```
+
+The frontend consent checkbox UI, `/user-agreement` + `/privacy-policy` routes, and footer links are already provided by upstream's `web/classic`. Do not re-implement them locally.
+
+### Production deployment (server-side, no CI)
+
+```bash
+git clone -b prod/stable https://github.com/bobobi0208/new-api.git && cd new-api
+docker build -t ghcr.io/bobobi0208/new-api:latest .
+docker compose up -d
+```
+
+The compose files reference `ghcr.io/bobobi0208/new-api:latest` by name; tag the locally built image with that name so compose picks it up. There is intentionally no CI workflow pushing this image — the server is authoritative.
+
+### Enabling the legal consent UI
+
+The frontend checkbox only renders when `user_agreement_enabled` and/or `privacy_policy_enabled` are true in `SystemStatus`. After deploying, in the admin console → System Settings → Legal:
+
+- Paste the user agreement text into `UserAgreement` (source: extract from `web/public/omnai-legal.html`).
+- Paste the privacy policy text into `PrivacyPolicy`.
+- Both fields being non-empty is what flips the enabled flags to true.
+
+Without this step, the server-side consent check will reject every registration because the frontend can't prompt the user to check the box.
