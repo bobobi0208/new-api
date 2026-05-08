@@ -1,0 +1,29 @@
+services:
+  new-api-slave:
+    image: ghcr.io/bobobi0208/new-api:latest
+    container_name: new-api-slave
+    restart: always
+    command: --log-dir /app/logs
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./slave-data:/data
+      - ./slave-logs:/app/logs
+    environment:
+      NODE_TYPE: slave
+      SQL_DSN: ${SQL_DSN}
+      REDIS_CONN_STRING: redis://:${CLUSTER_REDIS_PASSWORD}@${MASTER_REDIS_HOST}:6379/0
+      SESSION_SECRET: ${SESSION_SECRET}
+      CRYPTO_SECRET: ${CRYPTO_SECRET}
+      TZ: ${TZ}
+      ERROR_LOG_ENABLED: "true"
+      BATCH_UPDATE_ENABLED: "true"
+      SYNC_FREQUENCY: "60"
+      # Optional:
+      # - BATCH_UPDATE_INTERVAL=5
+      # - MEMORY_CACHE_ENABLED=false
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

@@ -1,0 +1,55 @@
+services:
+  new-api-master:
+    image: ghcr.io/bobobi0208/new-api:latest
+    container_name: new-api-master
+    restart: always
+    command: --log-dir /app/logs
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./master-data:/data
+      - ./master-logs:/app/logs
+    environment:
+      SQL_DSN: ${SQL_DSN}
+      REDIS_CONN_STRING: redis://:${CLUSTER_REDIS_PASSWORD}@redis:6379/0
+      SESSION_SECRET: ${SESSION_SECRET}
+      CRYPTO_SECRET: ${CRYPTO_SECRET}
+      TZ: ${TZ}
+      ERROR_LOG_ENABLED: "true"
+      BATCH_UPDATE_ENABLED: "true"
+      SYNC_FREQUENCY: "60"
+      # Optional:
+      # - BATCH_UPDATE_INTERVAL=5
+      # - SESSION_SECRET=use-the-same-value-on-every-node
+      # - CRYPTO_SECRET=use-the-same-value-on-every-node
+    depends_on:
+      - redis
+    networks:
+      - new-api-master-network
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: new-api-redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${CLUSTER_REDIS_PASSWORD}"]
+    ports:
+      # Only expose to the slave node via security group / firewall.
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+    networks:
+      - new-api-master-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${CLUSTER_REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  new-api-master-network:
+    driver: bridge

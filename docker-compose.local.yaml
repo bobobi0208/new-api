@@ -1,0 +1,78 @@
+services:
+  new-api:
+    image: ghcr.io/bobobi0208/new-api:latest
+    container_name: new-api-local
+    restart: unless-stopped
+    command: --log-dir /app/logs
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./local-data:/data
+      - ./local-logs:/app/logs
+    environment:
+      SQL_DSN: newapi:newapi123@tcp(mysql:3306)/newapi?charset=utf8mb4&parseTime=True&loc=Local
+      REDIS_CONN_STRING: redis://redis:6379/0
+      TZ: Asia/Shanghai
+      ERROR_LOG_ENABLED: "true"
+      BATCH_UPDATE_ENABLED: "true"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://localhost:3000/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - new-api-local-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: new-api-local-mysql
+    restart: unless-stopped
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: newapi
+      MYSQL_USER: newapi
+      MYSQL_PASSWORD: newapi123
+      TZ: Asia/Shanghai
+    volumes:
+      - ./local-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot123456 --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - new-api-local-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: new-api-local-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - ./local-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - new-api-local-network
+
+networks:
+  new-api-local-network:
+    driver: bridge

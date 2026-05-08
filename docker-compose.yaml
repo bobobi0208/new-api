@@ -1,0 +1,45 @@
+# 单机部署，数据库和 Redis 都走外部服务。
+#
+# 用法：
+#   1. 在仓库根目录创建 `.env`，至少设置：
+#      - SQL_DSN=mysql-user:mysql-pass@tcp(10.0.0.10:3306)/new-api?charset=utf8mb4&parseTime=True&loc=Local
+#        或 SQL_DSN=postgres://user:pass@10.0.0.10:5432/new-api?sslmode=disable
+#      - REDIS_CONN_STRING=redis://:redis-pass@10.0.0.20:6379/0
+#   2. 仓库里已经有 `docker-compose.yml`，启动时请显式指定本文件：
+#      docker compose -f docker-compose.yaml up -d
+
+services:
+  new-api:
+    image: ${NEW_API_IMAGE:-ghcr.io/bobobi0208/new-api:latest}
+    container_name: new-api
+    restart: always
+    command: --log-dir /app/logs
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    volumes:
+      - ./data:/data
+      - ./logs:/app/logs
+    environment:
+      PORT: ${PORT:-3000}
+      TZ: ${TZ:-Asia/Shanghai}
+      SQL_DSN: ${SQL_DSN:?set SQL_DSN in .env}
+      REDIS_CONN_STRING: ${REDIS_CONN_STRING:?set REDIS_CONN_STRING in .env}
+      ERROR_LOG_ENABLED: ${ERROR_LOG_ENABLED:-true}
+      BATCH_UPDATE_ENABLED: ${BATCH_UPDATE_ENABLED:-true}
+      MEMORY_CACHE_ENABLED: ${MEMORY_CACHE_ENABLED:-false}
+      SYNC_FREQUENCY: ${SYNC_FREQUENCY:-60}
+      # 单机不是强制，但生产环境仍建议显式设置，后续扩容更省事。
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      CRYPTO_SECRET: ${CRYPTO_SECRET:-}
+      # 可选覆盖项：
+      # LOG_SQL_DSN: ${LOG_SQL_DSN:-}
+      # STREAMING_TIMEOUT: ${STREAMING_TIMEOUT:-300}
+      # SQL_MAX_IDLE_CONNS: ${SQL_MAX_IDLE_CONNS:-100}
+      # SQL_MAX_OPEN_CONNS: ${SQL_MAX_OPEN_CONNS:-1000}
+      # SQL_MAX_LIFETIME: ${SQL_MAX_LIFETIME:-60}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:${PORT:-3000}/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

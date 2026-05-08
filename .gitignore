@@ -35,3 +35,11 @@ data/
 .test
 token_estimator_test.go
 skills-lock.json
+
+# 本地产物 / 开发缓存
+.pnpm-store/
+.tmp/
+.worktrees/
+local-logs/
+local-mysql/
+local-redis/
