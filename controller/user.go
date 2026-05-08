@@ -29,6 +29,17 @@ type LoginRequest struct {
 	Password string `json:"password"`
 }
 
+type RegisterRequest struct {
+	Username              string `json:"username" validate:"max=20"`
+	Password              string `json:"password" validate:"min=8,max=20"`
+	Email                 string `json:"email" validate:"max=50"`
+	VerificationCode      string `json:"verification_code"`
+	AffCode               string `json:"aff_code"`
+	AcceptedUserAgreement bool   `json:"accepted_user_agreement"`
+	AcceptedPrivacyPolicy bool   `json:"accepted_privacy_policy"`
+	AcceptedUsagePolicy   bool   `json:"accepted_usage_policy"`
+}
+
 func Login(c *gin.Context) {
 	if !common.PasswordLoginEnabled {
 		common.ApiErrorI18n(c, i18n.MsgUserPasswordLoginDisabled)
@@ -143,27 +154,31 @@ func Register(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserPasswordRegisterDisabled)
 		return
 	}
-	var user model.User
-	err := json.NewDecoder(c.Request.Body).Decode(&user)
+	var registerRequest RegisterRequest
+	err := common.DecodeJson(c.Request.Body, &registerRequest)
 	if err != nil {
 		common.ApiErrorI18n(c, i18n.MsgInvalidParams)
 		return
 	}
-	if err := common.Validate.Struct(&user); err != nil {
+	if err := common.Validate.Struct(&registerRequest); err != nil {
 		common.ApiErrorI18n(c, i18n.MsgUserInputInvalid, map[string]any{"Error": err.Error()})
 		return
 	}
+	if !registerRequest.AcceptedUserAgreement || !registerRequest.AcceptedPrivacyPolicy || !registerRequest.AcceptedUsagePolicy {
+		common.ApiErrorMsg(c, "请先阅读并同意用户协议、隐私政策和使用政策")
+		return
+	}
 	if common.EmailVerificationEnabled {
-		if user.Email == "" || user.VerificationCode == "" {
+		if registerRequest.Email == "" || registerRequest.VerificationCode == "" {
 			common.ApiErrorI18n(c, i18n.MsgUserEmailVerificationRequired)
 			return
 		}
-		if !common.VerifyCodeWithKey(user.Email, user.VerificationCode, common.EmailVerificationPurpose) {
+		if !common.VerifyCodeWithKey(registerRequest.Email, registerRequest.VerificationCode, common.EmailVerificationPurpose) {
 			common.ApiErrorI18n(c, i18n.MsgUserVerificationCodeError)
 			return
 		}
 	}
-	exist, err := model.CheckUserExistOrDeleted(user.Username, user.Email)
+	exist, err := model.CheckUserExistOrDeleted(registerRequest.Username, registerRequest.Email)
 	if err != nil {
 		common.ApiErrorI18n(c, i18n.MsgDatabaseError)
 		common.SysLog(fmt.Sprintf("CheckUserExistOrDeleted error: %v", err))
@@ -173,17 +188,21 @@ func Register(c *gin.Context) {
 		common.ApiErrorI18n(c, i18n.MsgUserExists)
 		return
 	}
-	affCode := user.AffCode // this code is the inviter's code, not the user's own code
+	affCode := registerRequest.AffCode // this code is the inviter's code, not the user's own code
 	inviterId, _ := model.GetUserIdByAffCode(affCode)
+	now := common.GetTimestamp()
 	cleanUser := model.User{
-		Username:    user.Username,
-		Password:    user.Password,
-		DisplayName: user.Username,
-		InviterId:   inviterId,
-		Role:        common.RoleCommonUser, // 明确设置角色为普通用户
+		Username:                registerRequest.Username,
+		Password:                registerRequest.Password,
+		DisplayName:             registerRequest.Username,
+		InviterId:               inviterId,
+		Role:                    common.RoleCommonUser, // 明确设置角色为普通用户
+		AcceptedUserAgreementAt: now,
+		AcceptedPrivacyPolicyAt: now,
+		AcceptedUsagePolicyAt:   now,
 	}
 	if common.EmailVerificationEnabled {
-		cleanUser.Email = user.Email
+		cleanUser.Email = registerRequest.Email
 	}
 	if err := cleanUser.Insert(inviterId); err != nil {
 		common.ApiError(c, err)
