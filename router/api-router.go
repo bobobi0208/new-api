@@ -307,6 +307,17 @@ func SetApiRouter(router *gin.Engine) {
 		logRoute.GET("/self", middleware.UserAuth(), controller.GetUserLogs)
 		logRoute.GET("/self/search", middleware.UserAuth(), middleware.SearchRateLimit(), controller.SearchUserLogs)
 
+		sensitiveMonitorRoute := apiRouter.Group("/sensitive_monitor")
+		sensitiveMonitorRoute.Use(middleware.AdminAuth())
+		{
+			sensitiveMonitorRoute.GET("/rules", controller.GetSensitiveMonitorRules)
+			sensitiveMonitorRoute.POST("/rules", controller.CreateSensitiveMonitorRule)
+			sensitiveMonitorRoute.PUT("/rules/:id", controller.UpdateSensitiveMonitorRule)
+			sensitiveMonitorRoute.GET("/hits", controller.GetSensitiveMonitorHits)
+			sensitiveMonitorRoute.POST("/reload", controller.ReloadSensitiveMonitorRules)
+			sensitiveMonitorRoute.POST("/seed_defaults", controller.SeedDefaultSensitiveMonitorRules)
+		}
+
 		dataRoute := apiRouter.Group("/data")
 		dataRoute.GET("/", middleware.AdminAuth(), controller.GetAllQuotaDates)
 		dataRoute.GET("/users", middleware.AdminAuth(), controller.GetQuotaDatesByUser)

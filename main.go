@@ -115,6 +115,9 @@ func main() {
 	// Channel cache stats aggregation task (runs daily at 07:00)
 	service.StartChannelCacheStatsTask()
 
+	// Sensitive monitor hit cleanup task (runs every 24 hours)
+	service.StartSensitiveMonitorHitCleanupTask()
+
 	// Wire task polling adaptor factory (breaks service -> relay import cycle)
 	service.GetTaskAdaptorFunc = func(platform constant.TaskPlatform) service.TaskPollingAdaptor {
 		a := relay.GetTaskAdaptor(platform)

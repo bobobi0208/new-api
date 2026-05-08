@@ -111,26 +111,32 @@ type GeneralOpenAIRequest struct {
 func (r *GeneralOpenAIRequest) GetTokenCountMeta() *types.TokenCountMeta {
 	var tokenCountMeta types.TokenCountMeta
 	var texts = make([]string, 0)
+	var sensitiveMonitorTexts = make([]string, 0)
+	var latestUserMessageTexts []string
 	var fileMeta = make([]*types.FileMeta, 0)
 
 	if r.Prompt != nil {
 		switch v := r.Prompt.(type) {
 		case string:
 			texts = append(texts, v)
+			sensitiveMonitorTexts = append(sensitiveMonitorTexts, v)
 		case []any:
 			for _, item := range v {
 				if str, ok := item.(string); ok {
 					texts = append(texts, str)
+					sensitiveMonitorTexts = append(sensitiveMonitorTexts, str)
 				}
 			}
 		default:
 			texts = append(texts, fmt.Sprintf("%v", r.Prompt))
+			sensitiveMonitorTexts = append(sensitiveMonitorTexts, fmt.Sprintf("%v", r.Prompt))
 		}
 	}
 
 	if r.Input != nil {
 		inputs := r.ParseInput()
 		texts = append(texts, inputs...)
+		sensitiveMonitorTexts = append(sensitiveMonitorTexts, inputs...)
 	}
 
 	maxTokens := lo.FromPtrOr(r.MaxTokens, uint(0))
@@ -170,8 +176,15 @@ func (r *GeneralOpenAIRequest) GetTokenCountMeta() *types.TokenCountMeta {
 					fileMeta = append(fileMeta, meta)
 				} else if m.Type == ContentTypeText {
 					texts = append(texts, m.Text)
+					if message.Role == "user" {
+						latestUserMessageTexts = append(latestUserMessageTexts, m.Text)
+					}
 				}
 			}
+		}
+		if message.Role == "user" && len(latestUserMessageTexts) > 0 {
+			sensitiveMonitorTexts = latestUserMessageTexts
+			latestUserMessageTexts = nil
 		}
 	}
 
@@ -192,6 +205,7 @@ func (r *GeneralOpenAIRequest) GetTokenCountMeta() *types.TokenCountMeta {
 		//tkm += toolTokens
 	}
 	tokenCountMeta.CombineText = strings.Join(texts, "\n")
+	tokenCountMeta.SensitiveMonitorText = strings.Join(sensitiveMonitorTexts, "\n")
 	tokenCountMeta.Files = fileMeta
 	return &tokenCountMeta
 }

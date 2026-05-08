@@ -123,10 +123,11 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 	}
 
 	needSensitiveCheck := setting.ShouldCheckPromptSensitive()
+	needSensitiveMonitor := service.ShouldRunSensitiveMonitor(c.Request.URL.Path)
 	needCountToken := constant.CountToken
 	// Avoid building huge CombineText (strings.Join) when token counting and sensitive check are both disabled.
 	var meta *types.TokenCountMeta
-	if needSensitiveCheck || needCountToken {
+	if needSensitiveCheck || needCountToken || needSensitiveMonitor {
 		meta = request.GetTokenCountMeta()
 	} else {
 		meta = fastTokenCountMetaForPricing(request)
@@ -139,6 +140,26 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			newAPIError = types.NewError(err, types.ErrorCodeSensitiveWordsDetected)
 			return
 		}
+	}
+
+	if needSensitiveMonitor && meta != nil && strings.TrimSpace(meta.CombineText) != "" {
+		monitorText := meta.SensitiveMonitorText
+		if strings.TrimSpace(monitorText) == "" {
+			monitorText = meta.CombineText
+		}
+		service.ScheduleSensitiveMonitor(service.SensitiveMonitorInput{
+			UserId:     relayInfo.UserId,
+			Username:   c.GetString("username"),
+			TokenId:    relayInfo.TokenId,
+			TokenName:  c.GetString("token_name"),
+			ModelName:  relayInfo.OriginModelName,
+			RequestId:  requestId,
+			Ip:         c.ClientIP(),
+			ChannelId:  c.GetInt("channel_id"),
+			Group:      relayInfo.UsingGroup,
+			Path:       c.Request.URL.Path,
+			PromptText: monitorText,
+		})
 	}
 
 	tokens, err := service.EstimateRequestToken(c, meta, relayInfo)

@@ -160,6 +160,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {
+        text: t('不良监控'),
+        itemKey: 'sensitiveMonitor',
+        to: '/console/sensitive-monitor',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
         text: t('模型管理'),
         itemKey: 'models',
         to: '/console/models',
