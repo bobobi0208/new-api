@@ -18,13 +18,14 @@ const (
 )
 
 type TokenCountMeta struct {
-	TokenType     TokenType   `json:"token_type,omitempty"`     // Type of tokens used in the request
-	CombineText   string      `json:"combine_text,omitempty"`   // Combined text from all messages
-	ToolsCount    int         `json:"tools_count,omitempty"`    // Number of tools used
-	NameCount     int         `json:"name_count,omitempty"`     // Number of names in the request
-	MessagesCount int         `json:"messages_count,omitempty"` // Number of messages in the request
-	Files         []*FileMeta `json:"files,omitempty"`          // List of files, each with type and content
-	MaxTokens     int         `json:"max_tokens,omitempty"`     // Maximum tokens allowed in the request
+	TokenType            TokenType   `json:"token_type,omitempty"`             // Type of tokens used in the request
+	CombineText          string      `json:"combine_text,omitempty"`           // Combined text from all messages
+	SensitiveMonitorText string      `json:"sensitive_monitor_text,omitempty"` // User prompt text for sensitive hit details
+	ToolsCount           int         `json:"tools_count,omitempty"`            // Number of tools used
+	NameCount            int         `json:"name_count,omitempty"`             // Number of names in the request
+	MessagesCount        int         `json:"messages_count,omitempty"`         // Number of messages in the request
+	Files                []*FileMeta `json:"files,omitempty"`                  // List of files, each with type and content
+	MaxTokens            int         `json:"max_tokens,omitempty"`             // Maximum tokens allowed in the request
 
 	ImagePriceRatio float64 `json:"image_ratio,omitempty"` // Ratio for image size, if applicable
 	//IsStreaming   bool        `json:"is_streaming,omitempty"`   // Indicates if the request is streaming

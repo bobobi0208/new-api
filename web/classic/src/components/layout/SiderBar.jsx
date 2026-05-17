@@ -38,6 +38,7 @@ const routerMap = {
   topup: '/console/topup',
   user: '/console/user',
   subscription: '/console/subscription',
+  sensitive_monitor: '/console/sensitive-monitor',
   reconciliation: '/console/reconciliation',
   log: '/console/log',
   midjourney: '/console/midjourney',
@@ -176,6 +177,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('兑换码管理'),
         itemKey: 'redemption',
         to: '/redemption',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('不良监控'),
+        itemKey: 'sensitive_monitor',
+        to: '/sensitive-monitor',
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {

@@ -303,8 +303,6 @@ func SetApiRouter(router *gin.Engine) {
 		logRoute.GET("/self", middleware.UserAuth(), controller.GetUserLogs)
 		logRoute.GET("/self/search", middleware.UserAuth(), middleware.SearchRateLimit(), controller.SearchUserLogs)
 
-		RegisterReconciliationRoutes(apiRouter)
-
 		sensitiveMonitorRoute := apiRouter.Group("/sensitive_monitor")
 		sensitiveMonitorRoute.Use(middleware.AdminAuth())
 		{
@@ -317,6 +315,8 @@ func SetApiRouter(router *gin.Engine) {
 			sensitiveMonitorRoute.POST("/reload", controller.ReloadSensitiveMonitorRules)
 			sensitiveMonitorRoute.POST("/seed_defaults", controller.SeedDefaultSensitiveMonitorRules)
 		}
+
+		RegisterReconciliationRoutes(apiRouter)
 
 		dataRoute := apiRouter.Group("/data")
 		dataRoute.GET("/", middleware.AdminAuth(), controller.GetAllQuotaDates)

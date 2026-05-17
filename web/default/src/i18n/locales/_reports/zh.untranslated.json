@@ -80,6 +80,7 @@
   "QuantumNous": "QuantumNous",
   "Quota:": "Quota:",
   "Replicate": "Replicate",
+  "{{page}} / {{pageCount}}": "{{page}} / {{pageCount}}",
   "SiliconFlow": "SiliconFlow",
   "smtp.example.com": "smtp.example.com",
   "socks5://user:pass@host:port": "socks5://user:pass@host:port",

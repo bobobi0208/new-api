@@ -281,6 +281,8 @@ func migrateDB() error {
 		&CustomOAuthProvider{},
 		&UserOAuthBinding{},
 		&PerfMetric{},
+		&SensitiveWord{},
+		&SensitiveWordHit{},
 		&ReconciliationRecord{},
 		&ReconciliationChannelConfig{},
 	)
@@ -332,6 +334,8 @@ func migrateDBFast() error {
 		{&CustomOAuthProvider{}, "CustomOAuthProvider"},
 		{&UserOAuthBinding{}, "UserOAuthBinding"},
 		{&PerfMetric{}, "PerfMetric"},
+		{&SensitiveWord{}, "SensitiveWord"},
+		{&SensitiveWordHit{}, "SensitiveWordHit"},
 		{&ReconciliationRecord{}, "ReconciliationRecord"},
 		{&ReconciliationChannelConfig{}, "ReconciliationChannelConfig"},
 	}

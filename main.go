@@ -120,6 +120,9 @@ func main() {
 	// Subscription quota reset task (daily/weekly/monthly/custom)
 	service.StartSubscriptionQuotaResetTask()
 
+	// Sensitive monitor hit cleanup task (runs every 24 hours)
+	service.StartSensitiveMonitorHitCleanupTask()
+
 	// Upstream reconciliation background tasks (balance sentry + daily diff)
 	reconciliation.StartAll()
 

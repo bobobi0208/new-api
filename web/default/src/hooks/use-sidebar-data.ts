@@ -32,6 +32,7 @@ import {
   MessageSquare,
   CreditCard,
   ListTodo,
+  ShieldAlert,
   Settings,
   Workflow,
 } from 'lucide-react'
@@ -140,6 +141,11 @@ export function useSidebarData(): SidebarData {
             title: t('Redemption Codes'),
             url: '/redemption-codes',
             icon: Ticket,
+          },
+          {
+            title: t('Sensitive Monitor'),
+            url: '/sensitive-monitor',
+            icon: ShieldAlert,
           },
           {
             title: t('Upstream Reconciliation'),

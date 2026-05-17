@@ -45,6 +45,7 @@ import ModelPage from './pages/Model';
 import ModelDeploymentPage from './pages/ModelDeployment';
 import Playground from './pages/Playground';
 import Subscription from './pages/Subscription';
+import SensitiveMonitor from './pages/SensitiveMonitor';
 import Reconciliation from './pages/Reconciliation';
 import OAuth2Callback from './components/auth/OAuth2Callback';
 import PersonalSetting from './components/settings/PersonalSetting';
@@ -161,6 +162,14 @@ function App() {
           element={
             <AdminRoute>
               <Redemption />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path='/console/sensitive-monitor'
+          element={
+            <AdminRoute>
+              <SensitiveMonitor />
             </AdminRoute>
           }
         />
