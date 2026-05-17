@@ -39,6 +39,9 @@ export interface RegisterPayload {
   verification_code?: string
   aff?: string
   turnstile?: string
+  accepted_user_agreement: boolean
+  accepted_privacy_policy: boolean
+  accepted_usage_policy: boolean
 }
 
 export interface PasswordResetPayload {
@@ -124,6 +127,7 @@ export interface SystemStatus {
     demo_site_enabled?: boolean
     user_agreement_enabled?: boolean
     privacy_policy_enabled?: boolean
+    usage_policy_enabled?: boolean
     oauth_register_enabled?: boolean
     register_enabled?: boolean
     password_register_enabled?: boolean
@@ -166,6 +170,7 @@ export interface SystemStatus {
   demo_site_enabled?: boolean
   user_agreement_enabled?: boolean
   privacy_policy_enabled?: boolean
+  usage_policy_enabled?: boolean
   oauth_register_enabled?: boolean
   register_enabled?: boolean
   password_register_enabled?: boolean

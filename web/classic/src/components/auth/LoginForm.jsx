@@ -107,11 +107,15 @@ const LoginForm = () => {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [hasUserAgreement, setHasUserAgreement] = useState(false);
   const [hasPrivacyPolicy, setHasPrivacyPolicy] = useState(false);
+  const [hasUsagePolicy, setHasUsagePolicy] = useState(true);
   const [githubButtonState, setGithubButtonState] = useState('idle');
   const [githubButtonDisabled, setGithubButtonDisabled] = useState(false);
   const githubTimeoutRef = useRef(null);
   const githubButtonText = t(githubButtonTextKeyByState[githubButtonState]);
   const [customOAuthLoading, setCustomOAuthLoading] = useState({});
+  const requiresLegalConsent =
+    hasUserAgreement || hasPrivacyPolicy || hasUsagePolicy;
+  const legalConsentMessage = t('请先阅读并同意用户协议、隐私政策和使用政策');
 
   const logo = getLogo();
   const systemName = getSystemName();
@@ -149,9 +153,10 @@ const LoginForm = () => {
       setTurnstileSiteKey(status.turnstile_site_key);
     }
 
-    // 从 status 获取用户协议和隐私政策的启用状态
+    // 从 status 获取用户协议、隐私政策和使用政策的启用状态
     setHasUserAgreement(status?.user_agreement_enabled || false);
     setHasPrivacyPolicy(status?.privacy_policy_enabled || false);
+    setHasUsagePolicy(status?.usage_policy_enabled ?? true);
   }, [status]);
 
   useEffect(() => {
@@ -173,8 +178,8 @@ const LoginForm = () => {
   }, []);
 
   const onWeChatLoginClicked = () => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     setWechatLoading(true);
@@ -216,8 +221,8 @@ const LoginForm = () => {
   }
 
   async function handleSubmit(e) {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     if (turnstileEnabled && turnstileToken === '') {
@@ -271,8 +276,8 @@ const LoginForm = () => {
 
   // 添加Telegram登录处理函数
   const onTelegramLoginClicked = async (response) => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     const fields = [
@@ -311,8 +316,8 @@ const LoginForm = () => {
 
   // 包装的GitHub登录点击处理
   const handleGitHubClick = () => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     if (githubButtonDisabled) {
@@ -339,8 +344,8 @@ const LoginForm = () => {
 
   // 包装的Discord登录点击处理
   const handleDiscordClick = () => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     setDiscordLoading(true);
@@ -354,8 +359,8 @@ const LoginForm = () => {
 
   // 包装的OIDC登录点击处理
   const handleOIDCClick = () => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     setOidcLoading(true);
@@ -374,8 +379,8 @@ const LoginForm = () => {
 
   // 包装的LinuxDO登录点击处理
   const handleLinuxDOClick = () => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     setLinuxdoLoading(true);
@@ -389,8 +394,8 @@ const LoginForm = () => {
 
   // 包装的自定义OAuth登录点击处理
   const handleCustomOAuthClick = (provider) => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     setCustomOAuthLoading((prev) => ({ ...prev, [provider.slug]: true }));
@@ -412,8 +417,8 @@ const LoginForm = () => {
   };
 
   const handlePasskeyLogin = async () => {
-    if ((hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms) {
-      showInfo(t('请先阅读并同意用户协议和隐私政策'));
+    if (requiresLegalConsent && !agreedToTerms) {
+      showInfo(legalConsentMessage);
       return;
     }
     if (!passkeySupported) {
@@ -658,7 +663,7 @@ const LoginForm = () => {
                 </Button>
               </div>
 
-              {(hasUserAgreement || hasPrivacyPolicy) && (
+              {requiresLegalConsent && (
                 <div className='mt-6'>
                   <Checkbox
                     checked={agreedToTerms}
@@ -688,6 +693,21 @@ const LoginForm = () => {
                             className='text-blue-600 hover:text-blue-800 mx-1'
                           >
                             {t('隐私政策')}
+                          </a>
+                        </>
+                      )}
+                      {hasUsagePolicy &&
+                        (hasUserAgreement || hasPrivacyPolicy) &&
+                        t('和')}
+                      {hasUsagePolicy && (
+                        <>
+                          <a
+                            href='/omnai-legal.html#usage'
+                            target='_blank'
+                            rel='noopener noreferrer'
+                            className='text-blue-600 hover:text-blue-800 mx-1'
+                          >
+                            {t('使用政策')}
                           </a>
                         </>
                       )}
@@ -764,7 +784,7 @@ const LoginForm = () => {
                   prefix={<IconLock />}
                 />
 
-                {(hasUserAgreement || hasPrivacyPolicy) && (
+                {requiresLegalConsent && (
                   <div className='pt-4'>
                     <Checkbox
                       checked={agreedToTerms}
@@ -797,6 +817,21 @@ const LoginForm = () => {
                             </a>
                           </>
                         )}
+                        {hasUsagePolicy &&
+                          (hasUserAgreement || hasPrivacyPolicy) &&
+                          t('和')}
+                        {hasUsagePolicy && (
+                          <>
+                            <a
+                              href='/omnai-legal.html#usage'
+                              target='_blank'
+                              rel='noopener noreferrer'
+                              className='text-blue-600 hover:text-blue-800 mx-1'
+                            >
+                              {t('使用政策')}
+                            </a>
+                          </>
+                        )}
                       </Text>
                     </Checkbox>
                   </div>
@@ -811,7 +846,7 @@ const LoginForm = () => {
                     onClick={handleSubmit}
                     loading={loginLoading}
                     disabled={
-                      (hasUserAgreement || hasPrivacyPolicy) && !agreedToTerms
+                      requiresLegalConsent && !agreedToTerms
                     }
                   >
                     {t('继续')}

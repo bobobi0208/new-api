@@ -39,53 +39,38 @@ export function TermsFooter({
 
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
   const hasPrivacyPolicy = Boolean(status?.privacy_policy_enabled)
+  const hasUsagePolicy = status?.usage_policy_enabled ?? true
 
-  if (!hasUserAgreement && !hasPrivacyPolicy) {
+  if (!hasUserAgreement && !hasPrivacyPolicy && !hasUsagePolicy) {
     return null
   }
 
-  const agreementLink = {
-    label: 'User Agreement',
-    href: '/user-agreement',
-  }
-  const privacyLink = {
-    label: 'Privacy Policy',
-    href: '/privacy-policy',
-  }
-
-  const activeLinks =
-    hasUserAgreement || hasPrivacyPolicy
-      ? ([
-          hasUserAgreement ? agreementLink : null,
-          hasPrivacyPolicy ? privacyLink : null,
-        ].filter(Boolean) as Array<{ label: string; href: string }>)
-      : [agreementLink, privacyLink]
-
-  const [firstLink, secondLink] = activeLinks
+  const activeLinks = [
+    hasUserAgreement
+      ? { label: 'User Agreement', href: '/user-agreement' }
+      : null,
+    hasPrivacyPolicy
+      ? { label: 'Privacy Policy', href: '/privacy-policy' }
+      : null,
+    hasUsagePolicy
+      ? { label: 'Usage Policy', href: '/omnai-legal.html#usage' }
+      : null,
+  ].filter(Boolean) as Array<{ label: string; href: string }>
 
   return (
     <p className={cn('text-muted-foreground text-center text-xs', className)}>
       {text}{' '}
-      {firstLink && (
-        <a
-          href={firstLink.href}
-          className='hover:text-primary underline underline-offset-4'
-        >
-          {firstLink.label}
-        </a>
-      )}
-      {secondLink && (
-        <>
-          {' '}
-          {t('and')}{' '}
+      {activeLinks.map((link, index) => (
+        <span key={link.href}>
+          {index > 0 ? ` ${t('and')} ` : null}
           <a
-            href={secondLink.href}
+            href={link.href}
             className='hover:text-primary underline underline-offset-4'
           >
-            {secondLink.label}
+            {t(link.label)}
           </a>
-        </>
-      )}
+        </span>
+      ))}
       .
     </p>
   )

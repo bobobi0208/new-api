@@ -101,7 +101,9 @@ export function SignUpForm({
   const emailVerificationRequired = !!status?.email_verification
   const hasUserAgreement = Boolean(status?.user_agreement_enabled)
   const hasPrivacyPolicy = Boolean(status?.privacy_policy_enabled)
-  const requiresLegalConsent = hasUserAgreement || hasPrivacyPolicy
+  const hasUsagePolicy = status?.usage_policy_enabled ?? true
+  const requiresLegalConsent =
+    hasUserAgreement || hasPrivacyPolicy || hasUsagePolicy
   const oauthRegisterEnabled =
     status?.oauth_register_enabled ??
     status?.data?.oauth_register_enabled ??
@@ -157,6 +159,9 @@ export function SignUpForm({
         verification_code: verificationCode || undefined,
         aff: getAffiliateCode(),
         turnstile: turnstileToken,
+        accepted_user_agreement: agreedToLegal,
+        accepted_privacy_policy: agreedToLegal,
+        accepted_usage_policy: agreedToLegal,
       })
 
       if (res?.success) {
