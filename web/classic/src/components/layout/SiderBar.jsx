@@ -38,6 +38,7 @@ const routerMap = {
   topup: '/console/topup',
   user: '/console/user',
   subscription: '/console/subscription',
+  reconciliation: '/console/reconciliation',
   log: '/console/log',
   midjourney: '/console/midjourney',
   setting: '/console/setting',
@@ -175,6 +176,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('兑换码管理'),
         itemKey: 'redemption',
         to: '/redemption',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('上游对账'),
+        itemKey: 'reconciliation',
+        to: '/reconciliation',
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {
