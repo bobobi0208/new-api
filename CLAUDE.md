@@ -189,3 +189,43 @@ The frontend checkbox only renders when `user_agreement_enabled` and/or `privacy
 - Both fields being non-empty is what flips the enabled flags to true.
 
 Without this step, the server-side consent check will reject every registration because the frontend can't prompt the user to check the box.
+
+## Image build & ship (Claude has burned on these — don't repeat)
+
+### 1. `docker buildx build --load` 不等于"镜像就上线了"
+
+**事件**：在 macOS 上为部署服务器构建 amd64 镜像，用了 `docker buildx build --platform linux/amd64 --load -t ghcr.io/...:latest .`，构建成功后向用户汇报"镜像已加载，compose 文件按名引用就能起"。但**用户部署端是从 ghcr.io 拉镜像**，`--load` 只把镜像装到我**本机** docker daemon，根本没碰 registry。结果服务器 `docker pull ghcr.io/...:latest` 拉到的仍是 4 天前 registry 上的旧版，新功能（reconciliation / sensitive-monitor / usage policy）一个都看不到。
+
+**事前必做**：构建前先确定镜像**最终在哪个 daemon 里跑**，按目的选标志：
+
+| 部署场景 | 正确做法 |
+|---|---|
+| 本机 `docker compose up -d` 直接起 | `--load`，compose 直接读本机 daemon |
+| 服务器从 `ghcr.io` 拉镜像 | `--push`（buildx 一步推到 registry，跳过本地 daemon） |
+| 走 CLAUDE.md 推荐路径（"server is authoritative"） | 服务器自己 `git pull && docker build && docker compose up -d`，**本机不参与构建** |
+
+`--push` 跟 `--load` 互斥。两边都要的话分两次 buildx 调用（cache 复用，第二次很快）。
+
+不要在不知道部署场景前就盲选 `--load` —— 它是 macOS 跨平台构建的"本地默认"，但远端部署它无效。
+
+### 2. push 后必须对一次 registry digest 才算交付
+
+派生自第 1 条：如果决定走 push 路径，push 完后**对一次 digest**确认 registry 真的有新镜像，再向用户报"镜像已就绪"：
+
+```bash
+# 远端 latest 现在指向的 digest（不需要 pull）
+docker manifest inspect ghcr.io/bobobi0208/new-api:latest | grep -A1 amd64 | head -5
+
+# 本地 latest 的 image ID（前 12 位 == digest 前 12 位即一致）
+docker images ghcr.io/bobobi0208/new-api:latest --format "{{.ID}}"
+```
+
+只有两者一致才能告诉用户"部署端 `docker pull` 拿到的就是新镜像"。
+
+### 3. 多架构 `:latest` 覆盖前先确认其它平台节点
+
+ghcr.io 上的 `:latest` 可能是多架构 manifest list（amd64 + arm64 + ...）。本地 `buildx --platform linux/amd64 --push -t ...:latest` 推上去会把 manifest list **覆盖为单架构 image**，原本拉 arm64 的节点下次拉 `:latest` 会拿到不能跑的架构。
+
+**事前必做**：push 单架构 `:latest` 前 `docker manifest inspect ghcr.io/.../...:latest` 看一眼现状；如果原本是 multi-arch manifest list，要么用 `docker buildx imagetools create` 拼一个新的多架构 manifest，要么明确告知用户"`:latest` 将从多架构降级到单 amd64"。
+
+
