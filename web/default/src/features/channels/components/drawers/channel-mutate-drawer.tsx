@@ -114,8 +114,14 @@ import {
   getGroups,
   getPrefillGroups,
   refreshCodexCredential,
+  searchChannels,
   updateChannel,
 } from '../../api'
+import {
+  listReconciliationChannelConfigs,
+  upsertReconciliationChannelConfig,
+} from '@/features/reconciliation/api'
+import { RECONCILIATION_UPSTREAM_TYPE } from '@/features/reconciliation/types'
 import {
   ADD_MODE_OPTIONS,
   CHANNEL_TYPE_OPTIONS,
@@ -300,6 +306,10 @@ export function ChannelMutateDrawer({
   const queryClient = useQueryClient()
   const { setOpen } = useChannels()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [upstreamType, setUpstreamType] = useState<string>('')
+  const [upstreamTypeError, setUpstreamTypeError] = useState<string | null>(
+    null
+  )
   const [customModel, setCustomModel] = useState('')
   const [fetchModelsDialogOpen, setFetchModelsDialogOpen] = useState(false)
   const [channelKey, setChannelKey] = useState<string | null>(null)
@@ -353,6 +363,13 @@ export function ChannelMutateDrawer({
     queryFn: () => getPrefillGroups('model'),
   })
 
+  // Fetch reconciliation configs to load existing upstream_type (edit mode)
+  const { data: reconciliationConfigsData } = useQuery({
+    queryKey: ['reconciliation_channel_configs'],
+    queryFn: listReconciliationChannelConfigs,
+    enabled: open,
+  })
+
   const { copyToClipboard } = useCopyToClipboard()
 
   const {
@@ -374,6 +391,23 @@ export function ChannelMutateDrawer({
       setChannelKey(null)
     }
   }, [open, channelId])
+
+  // Sync upstream_type state from existing reconciliation config (edit mode)
+  useEffect(() => {
+    if (!open) {
+      setUpstreamType('')
+      setUpstreamTypeError(null)
+      return
+    }
+    if (!isEditing || !channelId) {
+      setUpstreamType('')
+      return
+    }
+    const configs = reconciliationConfigsData?.data || []
+    const cfg = configs.find((c) => c.channel_id === channelId)
+    setUpstreamType(cfg?.upstream_type || '')
+    setUpstreamTypeError(null)
+  }, [open, isEditing, channelId, reconciliationConfigsData])
 
   // Check if this is a multi-key channel
   const isMultiKeyChannel =
@@ -933,6 +967,12 @@ export function ChannelMutateDrawer({
   // Submit handler
   const onSubmit = useCallback(
     async (data: ChannelFormValues) => {
+      // Validate upstream_type (required for reconciliation routing)
+      if (!upstreamType) {
+        setUpstreamTypeError(t('Upstream type is required'))
+        return
+      }
+
       // Validate key is required when creating
       if (!isEditing && !data.key?.trim()) {
         form.setError('key', {
@@ -1031,6 +1071,26 @@ export function ChannelMutateDrawer({
             payloadWithKeyMode
           )
           if (response.success) {
+            // Persist reconciliation upstream_type for this channel
+            try {
+              await upsertReconciliationChannelConfig({
+                channel_id: currentRow.id,
+                upstream_type: upstreamType,
+                enabled: true,
+                base_url: '',
+                note: '',
+              })
+              queryClient.invalidateQueries({
+                queryKey: ['reconciliation_channel_configs'],
+              })
+            } catch (reconcErr) {
+              toast.warning(
+                t(
+                  'Channel updated, but failed to save reconciliation type: {{msg}}',
+                  { msg: getErrorMessage(reconcErr) || 'unknown error' }
+                )
+              )
+            }
             toast.success(t(SUCCESS_MESSAGES.UPDATED))
             handleSuccess()
           }
@@ -1039,6 +1099,45 @@ export function ChannelMutateDrawer({
           const payload = transformFormDataToCreatePayload(data)
           const response = await createChannel(payload)
           if (response.success) {
+            // Reconcile created channel with reconciliation config.
+            // AddChannel doesn't return ids; reverse-lookup by name (best-effort).
+            try {
+              const lookup = await searchChannels({
+                keyword: data.name,
+                sort_by: 'id',
+                sort_order: 'desc',
+                page_size: 20,
+              })
+              const items =
+                (lookup as { data?: { items?: { id: number; name: string }[] } })
+                  .data?.items || []
+              const matched = items.find((c) => c.name === data.name)
+              if (matched?.id) {
+                await upsertReconciliationChannelConfig({
+                  channel_id: matched.id,
+                  upstream_type: upstreamType,
+                  enabled: true,
+                  base_url: '',
+                  note: '',
+                })
+                queryClient.invalidateQueries({
+                  queryKey: ['reconciliation_channel_configs'],
+                })
+              } else {
+                toast.warning(
+                  t(
+                    'Channel created, but could not locate it to save reconciliation type. Set it manually in the Reconciliation page.'
+                  )
+                )
+              }
+            } catch (reconcErr) {
+              toast.warning(
+                t(
+                  'Channel created, but failed to save reconciliation type: {{msg}}',
+                  { msg: getErrorMessage(reconcErr) || 'unknown error' }
+                )
+              )
+            }
             toast.success(t(SUCCESS_MESSAGES.CREATED))
             handleSuccess()
           }
@@ -1058,6 +1157,8 @@ export function ChannelMutateDrawer({
       confirmMissingModelMappings,
       confirmStatusCodeRisk,
       t,
+      upstreamType,
+      queryClient,
     ]
   )
 
@@ -2418,6 +2519,48 @@ export function ChannelMutateDrawer({
                     </FormItem>
                   )}
                 />
+              </div>
+
+              <div className='bg-card space-y-2 rounded-xl border px-5 py-4'>
+                <div className='space-y-0.5'>
+                  <div className='text-[13px] font-semibold'>
+                    {t('Upstream Type *')}
+                  </div>
+                  <div className='text-muted-foreground text-xs'>
+                    {t(
+                      'Required for reconciliation. Pick which gateway this channel actually routes to.'
+                    )}
+                  </div>
+                </div>
+                <Select
+                  value={upstreamType}
+                  onValueChange={(v) => {
+                    setUpstreamType(v ?? '')
+                    if (v) setUpstreamTypeError(null)
+                  }}
+                  disabled={isSubmitting}
+                >
+                  <SelectTrigger
+                    className={cn(
+                      upstreamTypeError && 'border-destructive'
+                    )}
+                  >
+                    <SelectValue placeholder={t('Select upstream type')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={RECONCILIATION_UPSTREAM_TYPE.NEWAPI}>
+                      new-api
+                    </SelectItem>
+                    <SelectItem value={RECONCILIATION_UPSTREAM_TYPE.SUB2API}>
+                      sub2api
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                {upstreamTypeError && (
+                  <p className='text-destructive text-xs'>
+                    {upstreamTypeError}
+                  </p>
+                )}
               </div>
 
               <Collapsible

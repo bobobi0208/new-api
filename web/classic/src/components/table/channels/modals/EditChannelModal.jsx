@@ -215,6 +215,8 @@ const EditChannelModal = (props) => {
     upstream_model_update_last_check_time: 0,
     upstream_model_update_last_detected_models: [],
     upstream_model_update_ignored_models: '',
+    // 对账系统：上游类型（必填，写入独立的 reconciliation_channel_configs 表）
+    upstream_type: '',
   };
   const [batch, setBatch] = useState(false);
   const [multiToSingle, setMultiToSingle] = useState(false);
@@ -403,6 +405,31 @@ const EditChannelModal = (props) => {
       setIonetMetadata(null);
     }
   }, [isEdit]);
+
+  // 编辑模式：拉取该 channel 已有的对账配置，填入 upstream_type 字段
+  useEffect(() => {
+    if (!isEdit || !channelId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await API.get('/api/reconciliation/channels');
+        if (cancelled) return;
+        const list = Array.isArray(res?.data?.data) ? res.data.data : [];
+        const cfg = list.find((c) => c.channel_id === parseInt(channelId));
+        if (cfg?.upstream_type) {
+          setInputs((prev) => ({ ...prev, upstream_type: cfg.upstream_type }));
+          if (formApiRef.current) {
+            formApiRef.current.setValue('upstream_type', cfg.upstream_type);
+          }
+        }
+      } catch (_) {
+        // ignore, 校验时再提醒
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isEdit, channelId]);
 
   const handleOpenIonetDeployment = () => {
     if (!ionetMetadata?.deployment_id) {
@@ -1829,6 +1856,9 @@ const EditChannelModal = (props) => {
     localInputs.settings = JSON.stringify(settings);
 
     // 清理不需要发送到后端的字段
+    // upstream_type 单独通过 /api/reconciliation/channels 写入，不应混进 channel 请求体
+    const selectedUpstreamType = localInputs.upstream_type || '';
+    delete localInputs.upstream_type;
     delete localInputs.force_format;
     delete localInputs.thinking_to_content;
     delete localInputs.proxy;
@@ -1879,6 +1909,45 @@ const EditChannelModal = (props) => {
     }
     const { success, message } = res.data;
     if (success) {
+      // 写入对账上游类型（独立的 reconciliation_channel_configs 表）
+      try {
+        let targetChannelId = isEdit ? parseInt(channelId) : null;
+        if (!isEdit && localInputs.name) {
+          const lookup = await API.get('/api/channel/search', {
+            params: {
+              keyword: localInputs.name,
+              page_size: 20,
+              sort_by: 'id',
+              sort_order: 'desc',
+            },
+          });
+          const items = lookup?.data?.data?.items || [];
+          const matched = items.find((c) => c.name === localInputs.name);
+          if (matched?.id) {
+            targetChannelId = matched.id;
+          }
+        }
+        if (targetChannelId && selectedUpstreamType) {
+          await API.post('/api/reconciliation/channels', {
+            channel_id: targetChannelId,
+            upstream_type: selectedUpstreamType,
+            enabled: true,
+            base_url: '',
+            note: '',
+          });
+        } else if (!targetChannelId) {
+          showInfo(
+            t(
+              '渠道已保存，但未能定位 channel id 写入对账类型，请到对账配置页手动设置',
+            ),
+          );
+        }
+      } catch (e) {
+        showInfo(
+          t('渠道已保存，但对账类型写入失败：') + (e?.message || ''),
+        );
+      }
+
       if (isEdit) {
         showSuccess(t('渠道更新成功！'));
       } else {
@@ -3592,6 +3661,27 @@ const EditChannelModal = (props) => {
                     style={{ width: '100%' }}
                     position='top'
                     onChange={(value) => handleInputChange('groups', value)}
+                  />
+
+                  {/* Upstream Type - Required for Reconciliation */}
+                  <Form.Select
+                    field='upstream_type'
+                    label={t('对账上游类型')}
+                    placeholder={t('请选择 newapi 或 sub2api')}
+                    rules={[
+                      { required: true, message: t('请选择对账上游类型') },
+                    ]}
+                    optionList={[
+                      { label: 'new-api', value: 'newapi' },
+                      { label: 'sub2api', value: 'sub2api' },
+                    ]}
+                    style={{ width: '100%' }}
+                    onChange={(value) =>
+                      handleInputChange('upstream_type', value)
+                    }
+                    extraText={t(
+                      '该 channel 实际转发到的中转网关类型，决定对账使用哪个上游接口（必填）',
+                    )}
                   />
 
                   {/* Model Mapping - Core Config */}
