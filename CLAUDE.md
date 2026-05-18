@@ -138,12 +138,11 @@ When working on tiered/dynamic billing (expression-based pricing), you MUST read
 
 ## Branch Conventions
 
-This fork uses three long-lived branches. Each has a fixed role — do not blur them.
+This fork uses two long-lived branches. Each has a fixed role — do not blur them.
 
 | Branch | Role | Tracking |
 |---|---|---|
 | `main` | Mirror of upstream `QuantumNous/new-api`. Kept clean, no fork-specific patches. | `origin/main` |
-| `feat/channel-health-refactor` | Historical snapshot of prior personal work (17 commits on top of a past `main`). Read-only archive; do not commit new work here. | `origin/feat/channel-health-refactor` |
 | `prod/stable` | Production deployment line. Based on `main` plus the minimal fork-specific patches below. Deploy from this branch. | `origin/prod/stable` |
 
 ### What `prod/stable` adds on top of `main`
