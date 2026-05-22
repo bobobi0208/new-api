@@ -133,5 +133,16 @@
   "Only valid": "Only valid",
   "Severity": "Severity",
   "Unmark false positive": "Unmark false positive",
-  "e.g. sexual_assault": "e.g. sexual_assault"
+  "e.g. sexual_assault": "e.g. sexual_assault",
+  "Invite Customers": "Invite Customers",
+  "Share this link with prospects. Anyone who signs up via this link is automatically bound to you and you will earn commission from their consume.": "Share this link with prospects. Anyone who signs up via this link is automatically bound to you and you will earn commission from their consume.",
+  "Affiliate code": "Affiliate code",
+  "Invited so far": "Invited so far",
+  "Invite code (optional)": "Invite code (optional)",
+  "Your sales contact's invite code": "Your sales contact's invite code",
+  "Sales Role": "Sales Role",
+  "This user is a sales (role=5). Demoting will stop new commission accrual; bound customers stay bound until you unbind them via SQL or future tooling.": "This user is a sales (role=5). Demoting will stop new commission accrual; bound customers stay bound until you unbind them via SQL or future tooling.",
+  "Promote a regular user to sales. After promotion they get a /sales dashboard with their own invite link; customers signing up via that link are auto-bound to them.": "Promote a regular user to sales. After promotion they get a /sales dashboard with their own invite link; customers signing up via that link are auto-bound to them.",
+  "Existing bindings via inviter_id stay intact, but new consume will not accrue commission.": "Existing bindings via inviter_id stay intact, but new consume will not accrue commission.",
+  "User will gain access to /sales dashboard and start accruing commission from customers who sign up via their invite link.": "User will gain access to /sales dashboard and start accruing commission from customers who sign up via their invite link."
 }

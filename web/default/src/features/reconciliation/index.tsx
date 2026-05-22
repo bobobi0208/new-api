@@ -163,6 +163,7 @@ export function Reconciliation() {
         </Button>
       </SectionPageLayout.Actions>
 
+      <SectionPageLayout.Content>
       <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)} className="w-full">
         <TabsList>
           <TabsTrigger value="latest">{t('Latest per channel')}</TabsTrigger>
@@ -358,6 +359,7 @@ export function Reconciliation() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </SectionPageLayout.Content>
     </SectionPageLayout>
   )
 }

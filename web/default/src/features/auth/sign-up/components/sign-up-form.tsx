@@ -53,7 +53,7 @@ import { registerFormSchema } from '@/features/auth/constants'
 import { useAuthRedirect } from '@/features/auth/hooks/use-auth-redirect'
 import { useEmailVerification } from '@/features/auth/hooks/use-email-verification'
 import { useTurnstile } from '@/features/auth/hooks/use-turnstile'
-import { getAffiliateCode } from '@/features/auth/lib/storage'
+import { getAffiliateCode, saveAffiliateCode } from '@/features/auth/lib/storage'
 
 export function SignUpForm({
   className,
@@ -94,8 +94,28 @@ export function SignUpForm({
       email: '',
       password: '',
       confirmPassword: '',
+      affiliateCode: '',
     },
   })
+
+  // Prefill affiliate code from URL (?aff=xxxx) or localStorage on mount.
+  // URL parameter takes precedence so a fresh invite link always overrides any
+  // stale value left over from a previous visit.
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const fromUrl = new URLSearchParams(window.location.search).get('aff') ?? ''
+    const trimmed = fromUrl.trim()
+    if (trimmed) {
+      form.setValue('affiliateCode', trimmed)
+      saveAffiliateCode(trimmed)
+      return
+    }
+    const stored = getAffiliateCode()
+    if (stored) {
+      form.setValue('affiliateCode', stored)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const emailValue = form.watch('email')
   const emailVerificationRequired = !!status?.email_verification
@@ -152,12 +172,17 @@ export function SignUpForm({
 
     setIsLoading(true)
     try {
+      const affFromForm = (data.affiliateCode ?? '').trim()
+      const affFinal = affFromForm || getAffiliateCode()
+      if (affFromForm) {
+        saveAffiliateCode(affFromForm)
+      }
       const res = await register({
         username: data.username,
         password: data.password,
         email: data.email || undefined,
         verification_code: verificationCode || undefined,
-        aff: getAffiliateCode(),
+        aff: affFinal,
         turnstile: turnstileToken,
         accepted_user_agreement: agreedToLegal,
         accepted_privacy_policy: agreedToLegal,
@@ -334,6 +359,25 @@ export function SignUpForm({
             )}
           </>
         )}
+
+        {/* Affiliate Code (optional, prefilled from ?aff= URL parameter) */}
+        <FormField
+          control={form.control}
+          name='affiliateCode'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('Invite code (optional)')}</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder={t("Your sales contact's invite code")}
+                  autoComplete='off'
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <LegalConsent
           status={status}

@@ -173,6 +173,12 @@ func UserAuth() func(c *gin.Context) {
 	}
 }
 
+func SalesAuth() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		authHelper(c, common.RoleSalesUser)
+	}
+}
+
 func AdminAuth() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		authHelper(c, common.RoleAdminUser)

@@ -176,6 +176,39 @@ func SetApiRouter(router *gin.Engine) {
 		apiRouter.GET("/subscription/epay/notify", controller.SubscriptionEpayNotify)
 		apiRouter.GET("/subscription/epay/return", controller.SubscriptionEpayReturn)
 		apiRouter.POST("/subscription/epay/return", controller.SubscriptionEpayReturn)
+
+		// Sales / Commission (一级分销商系统)
+		salesRoute := apiRouter.Group("/sales")
+		salesRoute.Use(middleware.SalesAuth())
+		{
+			salesRoute.GET("/dashboard", controller.GetSalesDashboard)
+			salesRoute.GET("/customers", controller.GetSalesCustomers)
+			salesRoute.GET("/consumes", controller.GetSalesConsumes)
+			salesRoute.GET("/bills", controller.GetSalesBills)
+			salesRoute.POST("/withdraw", middleware.CriticalRateLimit(), controller.PostSalesWithdraw)
+			salesRoute.GET("/withdraws", controller.GetSalesWithdraws)
+		}
+		salesAdminRoute := apiRouter.Group("/admin/sales")
+		salesAdminRoute.Use(middleware.AdminAuth())
+		{
+			salesAdminRoute.GET("/users", controller.ListAllSales)
+			salesAdminRoute.POST("/users/:id/promote", controller.PromoteUserToSales)
+			salesAdminRoute.POST("/users/:id/demote", controller.DemoteSalesToUser)
+			salesAdminRoute.PATCH("/users/:id/bind", controller.BindCustomerToSales)
+			salesAdminRoute.PATCH("/users/:id/tiers", controller.UpdateSalesTiers)
+
+			salesAdminRoute.GET("/commission/default-tiers", controller.GetDefaultCommissionTiers)
+			salesAdminRoute.PUT("/commission/default-tiers", controller.SetDefaultCommissionTiers)
+			salesAdminRoute.POST("/commission/bills/generate", controller.GenerateMonthlyBills)
+			salesAdminRoute.GET("/commission/bills", controller.ListCommissionBills)
+			salesAdminRoute.POST("/commission/bills/:id/confirm", controller.ConfirmCommissionBill)
+
+			salesAdminRoute.GET("/withdraws", controller.ListAdminWithdraws)
+			salesAdminRoute.POST("/withdraws/:id/approve", controller.ApproveWithdraw)
+			salesAdminRoute.POST("/withdraws/:id/reject", controller.RejectWithdraw)
+			salesAdminRoute.POST("/withdraws/:id/paid", controller.MarkWithdrawPaid)
+		}
+
 		optionRoute := apiRouter.Group("/option")
 		optionRoute.Use(middleware.RootAuth())
 		{

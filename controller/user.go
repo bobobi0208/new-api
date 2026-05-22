@@ -35,7 +35,7 @@ type RegisterRequest struct {
 	Password              string `json:"password" validate:"min=8,max=20"`
 	Email                 string `json:"email" validate:"max=50"`
 	VerificationCode      string `json:"verification_code"`
-	AffCode               string `json:"aff_code"`
+	AffCode               string `json:"aff"`
 	AcceptedUserAgreement bool   `json:"accepted_user_agreement"`
 	AcceptedPrivacyPolicy bool   `json:"accepted_privacy_policy"`
 	AcceptedUsagePolicy   bool   `json:"accepted_usage_policy"`
