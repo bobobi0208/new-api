@@ -46,13 +46,13 @@ export function LegalConsent({
 
   const links = [
     hasUserAgreement
-      ? { href: '/user-agreement', label: 'User Agreement' }
+      ? { href: '/legal.html#user-agreement', label: 'User Agreement' }
       : null,
     hasPrivacyPolicy
-      ? { href: '/privacy-policy', label: 'Privacy Policy' }
+      ? { href: '/legal.html#privacy-policy', label: 'Privacy Policy' }
       : null,
     hasUsagePolicy
-      ? { href: '/omnai-legal.html#usage', label: 'Usage Policy' }
+      ? { href: '/legal.html#usage-policy', label: 'Usage Policy' }
       : null,
   ].filter(Boolean) as Array<{ href: string; label: string }>
 

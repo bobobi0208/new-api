@@ -368,6 +368,8 @@ export function ChannelMutateDrawer({
     queryKey: ['reconciliation_channel_configs'],
     queryFn: listReconciliationChannelConfigs,
     enabled: open,
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
   const { copyToClipboard } = useCopyToClipboard()
@@ -392,7 +394,10 @@ export function ChannelMutateDrawer({
     }
   }, [open, channelId])
 
-  // Sync upstream_type state from existing reconciliation config (edit mode)
+  // Sync upstream_type state from existing reconciliation config (edit mode).
+  // Only mutate state once the query has actually delivered data — otherwise
+  // we briefly clobber a still-loading edit drawer with '' and the user sees
+  // an empty Select on every reopen even though a config exists server-side.
   useEffect(() => {
     if (!open) {
       setUpstreamType('')
@@ -403,7 +408,13 @@ export function ChannelMutateDrawer({
       setUpstreamType('')
       return
     }
-    const configs = reconciliationConfigsData?.data || []
+    // Wait for the query to resolve before applying a value. While loading,
+    // keep whatever the field currently holds (initial '' on first open, or
+    // the previously-applied value across re-renders).
+    if (!reconciliationConfigsData?.data) {
+      return
+    }
+    const configs = reconciliationConfigsData.data
     const cfg = configs.find((c) => c.channel_id === channelId)
     setUpstreamType(cfg?.upstream_type || '')
     setUpstreamTypeError(null)
@@ -1071,14 +1082,20 @@ export function ChannelMutateDrawer({
             payloadWithKeyMode
           )
           if (response.success) {
-            // Persist reconciliation upstream_type for this channel
+            // Persist reconciliation upstream_type for this channel.
+            // Preserve any existing base_url/note that were set on the
+            // Reconciliation page — sending '' would clobber them through
+            // GORM's OnConflict AssignmentColumns.
+            const existingCfg = (
+              reconciliationConfigsData?.data || []
+            ).find((c) => c.channel_id === currentRow.id)
             try {
               await upsertReconciliationChannelConfig({
                 channel_id: currentRow.id,
                 upstream_type: upstreamType,
-                enabled: true,
-                base_url: '',
-                note: '',
+                enabled: existingCfg?.enabled ?? true,
+                base_url: existingCfg?.base_url ?? '',
+                note: existingCfg?.note ?? '',
               })
               queryClient.invalidateQueries({
                 queryKey: ['reconciliation_channel_configs'],

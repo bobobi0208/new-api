@@ -47,13 +47,13 @@ export function TermsFooter({
 
   const activeLinks = [
     hasUserAgreement
-      ? { label: 'User Agreement', href: '/user-agreement' }
+      ? { label: 'User Agreement', href: '/legal.html#user-agreement' }
       : null,
     hasPrivacyPolicy
-      ? { label: 'Privacy Policy', href: '/privacy-policy' }
+      ? { label: 'Privacy Policy', href: '/legal.html#privacy-policy' }
       : null,
     hasUsagePolicy
-      ? { label: 'Usage Policy', href: '/omnai-legal.html#usage' }
+      ? { label: 'Usage Policy', href: '/legal.html#usage-policy' }
       : null,
   ].filter(Boolean) as Array<{ label: string; href: string }>
 

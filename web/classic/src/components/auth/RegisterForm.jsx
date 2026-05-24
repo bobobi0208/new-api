@@ -573,7 +573,7 @@ const RegisterForm = () => {
                         {hasUserAgreement && (
                           <>
                             <a
-                              href='/user-agreement'
+                              href='/legal.html#user-agreement'
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'
@@ -586,7 +586,7 @@ const RegisterForm = () => {
                         {hasPrivacyPolicy && (
                           <>
                             <a
-                              href='/privacy-policy'
+                              href='/legal.html#privacy-policy'
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'
@@ -601,7 +601,7 @@ const RegisterForm = () => {
                         {hasUsagePolicy && (
                           <>
                             <a
-                              href='/omnai-legal.html#usage'
+                              href='/legal.html#usage-policy'
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'
@@ -743,7 +743,7 @@ const RegisterForm = () => {
                         {hasUserAgreement && (
                           <>
                             <a
-                              href='/user-agreement'
+                              href='/legal.html#user-agreement'
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'
@@ -756,7 +756,7 @@ const RegisterForm = () => {
                         {hasPrivacyPolicy && (
                           <>
                             <a
-                              href='/privacy-policy'
+                              href='/legal.html#privacy-policy'
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'
@@ -771,7 +771,7 @@ const RegisterForm = () => {
                         {hasUsagePolicy && (
                           <>
                             <a
-                              href='/omnai-legal.html#usage'
+                              href='/legal.html#usage-policy'
                               target='_blank'
                               rel='noopener noreferrer'
                               className='text-blue-600 hover:text-blue-800 mx-1'

@@ -72,8 +72,13 @@ const BILLING_SECTIONS = [
           },
         }}
         complianceConfirmed={
-          (settings['payment_setting.compliance_confirmed'] ?? false) &&
-          settings['payment_setting.compliance_terms_version'] === 'v1'
+          // fork override: payment compliance gate is bypassed at the server level
+          // (see setting/operation_setting/payment_setting.go IsPaymentComplianceConfirmed).
+          // Force the UI gate open here too. Keep this expression on a separate
+          // line so future upstream changes to the original boolean stay isolated.
+          true ||
+          ((settings['payment_setting.compliance_confirmed'] ?? false) &&
+            settings['payment_setting.compliance_terms_version'] === 'v1')
         }
       />
     ),
@@ -184,9 +189,11 @@ const BILLING_SECTIONS = [
         waffoPancakeProvisionedStoreID={settings.WaffoPancakeStoreID ?? ''}
         waffoPancakeProvisionedProductID={settings.WaffoPancakeProductID ?? ''}
         complianceDefaults={{
-          confirmed: settings['payment_setting.compliance_confirmed'] ?? false,
+          // fork override: force-confirm to bypass the in-console risk dialog.
+          // Server-side gate already returns true unconditionally.
+          confirmed: true,
           termsVersion:
-            settings['payment_setting.compliance_terms_version'] ?? '',
+            settings['payment_setting.compliance_terms_version'] ?? 'v1',
           confirmedAt: settings['payment_setting.compliance_confirmed_at'] ?? 0,
           confirmedBy: settings['payment_setting.compliance_confirmed_by'] ?? 0,
         }}

@@ -86,14 +86,21 @@ function LegalLinks(props: { leadingSeparator?: boolean }) {
     items.push({
       key: 'user-agreement',
       label: t('User Agreement'),
-      href: '/user-agreement',
+      href: '/legal.html#user-agreement',
     })
   }
   if (status?.privacy_policy_enabled) {
     items.push({
       key: 'privacy-policy',
       label: t('Privacy Policy'),
-      href: '/privacy-policy',
+      href: '/legal.html#privacy-policy',
+    })
+  }
+  if (status?.usage_policy_enabled ?? true) {
+    items.push({
+      key: 'usage-policy',
+      label: t('Usage Policy'),
+      href: '/legal.html#usage-policy',
     })
   }
   if (items.length === 0) {
@@ -108,12 +115,18 @@ function LegalLinks(props: { leadingSeparator?: boolean }) {
               ·
             </span>
           )}
-          <Link
-            to={item.href}
+          {/*
+            Use a plain <a> rather than TanStack Router's <Link>. /legal.html
+            is a static asset embedded into the frontend bundle, not a SPA
+            route — <Link to="/legal.html"> would force the router to look
+            up an unregistered route and fall through to the 404 boundary.
+          */}
+          <a
+            href={item.href}
             className='hover:text-foreground transition-colors duration-200'
           >
             {item.label}
-          </Link>
+          </a>
         </Fragment>
       ))}
     </>

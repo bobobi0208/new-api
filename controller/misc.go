@@ -46,7 +46,11 @@ func GetStatus(c *gin.Context) {
 	defer common.OptionMapRWMutex.RUnlock()
 
 	passkeySetting := system_setting.GetPasskeySettings()
-	legalSetting := system_setting.GetLegalSettings()
+	// fork: legal section enabled flags are forced to true unconditionally
+	// below (user_agreement_enabled / privacy_policy_enabled / usage_policy_enabled),
+	// so we don't need to load legalSetting here. The dynamic content is still
+	// served by GetUserAgreement / GetPrivacyPolicy handlers further down, which
+	// keeps the upstream `system_setting` import in use.
 
 	data := gin.H{
 		"version":                     common.Version,
@@ -116,8 +120,12 @@ func GetStatus(c *gin.Context) {
 		"passkey_user_verification":   passkeySetting.UserVerification,
 		"passkey_attachment":          passkeySetting.AttachmentPreference,
 		"setup":                       constant.Setup,
-		"user_agreement_enabled":      legalSetting.UserAgreement != "",
-		"privacy_policy_enabled":      legalSetting.PrivacyPolicy != "",
+		// fork: always advertise the three legal sections as enabled — the auth
+		// flows link to /omnai-legal.html anchors rather than the dynamic
+		// /api/user-agreement and /api/privacy-policy endpoints, so we don't
+		// want admin-side blank fields to silently hide the links.
+		"user_agreement_enabled":      true,
+		"privacy_policy_enabled":      true,
 		"usage_policy_enabled":        true,
 		"checkin_enabled":             operation_setting.GetCheckinSetting().Enabled,
 	}
