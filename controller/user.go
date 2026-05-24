@@ -283,6 +283,10 @@ func SearchUsers(c *gin.Context) {
 	return
 }
 
+func canManageTargetRole(myRole int, targetRole int) bool {
+	return myRole == common.RoleRootUser || myRole > targetRole
+}
+
 func GetUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -295,7 +299,7 @@ func GetUser(c *gin.Context) {
 		return
 	}
 	myRole := c.GetInt("role")
-	if myRole <= user.Role && myRole != common.RoleRootUser {
+	if !canManageTargetRole(myRole, user.Role) {
 		common.ApiErrorI18n(c, i18n.MsgUserNoPermissionSameLevel)
 		return
 	}
@@ -586,11 +590,11 @@ func UpdateUser(c *gin.Context) {
 		return
 	}
 	myRole := c.GetInt("role")
-	if myRole <= originUser.Role && myRole != common.RoleRootUser {
+	if !canManageTargetRole(myRole, originUser.Role) {
 		common.ApiErrorI18n(c, i18n.MsgUserNoPermissionHigherLevel)
 		return
 	}
-	if myRole <= updatedUser.Role && myRole != common.RoleRootUser {
+	if !canManageTargetRole(myRole, updatedUser.Role) {
 		common.ApiErrorI18n(c, i18n.MsgUserCannotCreateHigherLevel)
 		return
 	}
@@ -629,7 +633,7 @@ func AdminClearUserBinding(c *gin.Context) {
 	}
 
 	myRole := c.GetInt("role")
-	if myRole <= user.Role && myRole != common.RoleRootUser {
+	if !canManageTargetRole(myRole, user.Role) {
 		common.ApiErrorI18n(c, i18n.MsgUserNoPermissionSameLevel)
 		return
 	}
@@ -797,12 +801,14 @@ func DeleteUser(c *gin.Context) {
 	}
 	err = model.HardDeleteUserById(id)
 	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"success": true,
-			"message": "",
-		})
+		common.ApiError(c, err)
 		return
 	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+	})
+	return
 }
 
 func DeleteSelf(c *gin.Context) {
@@ -891,7 +897,7 @@ func ManageUser(c *gin.Context) {
 		return
 	}
 	myRole := c.GetInt("role")
-	if myRole <= user.Role && myRole != common.RoleRootUser {
+	if !canManageTargetRole(myRole, user.Role) {
 		common.ApiErrorI18n(c, i18n.MsgUserNoPermissionHigherLevel)
 		return
 	}

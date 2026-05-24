@@ -170,6 +170,8 @@ export function SignUpForm({
       }
     }
 
+    if (!validateTurnstile()) return
+
     setIsLoading(true)
     try {
       const affFromForm = (data.affiliateCode ?? '').trim()
@@ -182,7 +184,7 @@ export function SignUpForm({
         password: data.password,
         email: data.email || undefined,
         verification_code: verificationCode || undefined,
-        aff: affFinal,
+        aff_code: affFinal,
         turnstile: turnstileToken,
         accepted_user_agreement: agreedToLegal,
         accepted_privacy_policy: agreedToLegal,
@@ -348,15 +350,6 @@ export function SignUpForm({
               </Button>
             </div>
 
-            {/* Turnstile */}
-            {isTurnstileEnabled && (
-              <div className='mt-2'>
-                <Turnstile
-                  siteKey={turnstileSiteKey}
-                  onVerify={setTurnstileToken}
-                />
-              </div>
-            )}
           </>
         )}
 
@@ -378,6 +371,16 @@ export function SignUpForm({
             </FormItem>
           )}
         />
+
+        {/* Turnstile */}
+        {isTurnstileEnabled && (
+          <div className='mt-2'>
+            <Turnstile
+              siteKey={turnstileSiteKey}
+              onVerify={setTurnstileToken}
+            />
+          </div>
+        )}
 
         <LegalConsent
           status={status}
