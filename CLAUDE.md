@@ -152,7 +152,7 @@ Exactly two commits, minimized to reduce future merge friction:
 1. **`chore: carry over deployment configs ...`** — 7 deployment files + legal content asset + ignore rules for local artifacts:
    - `docker-compose.yaml`, `docker-compose.yml`, `docker-compose.local.yaml`, `docker-compose.external.yaml`, `docker-compose-master.yaml`, `docker-compose-slave.yaml` (all pull `ghcr.io/bobobi0208/new-api:latest`)
    - `.env.example` (variable names paired with the compose files)
-   - `web/public/omnai-legal.html` (content asset; paste into admin console's Legal settings)
+   - `web/default/public/legal.html` and `web/classic/public/legal.html` (static legal page served at `/legal.html#user-agreement|#privacy-policy|#usage-policy|#supported-regions`; rsbuild/vite copy it to `dist/` at build time and Go embeds the dist tree)
    - `.gitignore` appended: `.pnpm-store/`, `.tmp/`, `.worktrees/`, `local-logs/`, `local-mysql/`, `local-redis/`
 2. **`feat: require legal consent on register`** — server-side consent enforcement on `/api/user/register`:
    - Adds `AcceptedUserAgreementAt`, `AcceptedPrivacyPolicyAt`, `AcceptedUsagePolicyAt` (bigint) to `model.User`
@@ -179,15 +179,16 @@ docker compose up -d
 
 The compose files reference `ghcr.io/bobobi0208/new-api:latest` by name; tag the locally built image with that name so compose picks it up. There is intentionally no CI workflow pushing this image — the server is authoritative.
 
-### Enabling the legal consent UI
+### Legal pages (static)
 
-The frontend checkbox only renders when `user_agreement_enabled` and/or `privacy_policy_enabled` are true in `SystemStatus`. After deploying, in the admin console → System Settings → Legal:
+The User Agreement / Privacy Policy / Usage Policy / Supported Regions text is served as a single static HTML file at `/legal.html` (anchors `#user-agreement`, `#privacy-policy`, `#usage-policy`, `#supported-regions`). The source lives in **two places** — one per frontend theme — because each frontend's build pipeline only sees its own `public/` directory:
 
-- Paste the user agreement text into `UserAgreement` (source: extract from `web/public/omnai-legal.html`).
-- Paste the privacy policy text into `PrivacyPolicy`.
-- Both fields being non-empty is what flips the enabled flags to true.
+- `web/default/public/legal.html` — picked up by rsbuild and copied into `web/default/dist/`
+- `web/classic/public/legal.html` — picked up by vite and copied into `web/classic/dist/`
 
-Without this step, the server-side consent check will reject every registration because the frontend can't prompt the user to check the box.
+Keep the two files in sync. When you edit the legal copy, edit both (or edit one and `cp` it to the other). Production builds embed `web/default/dist` and `web/classic/dist` into the Go binary, so the static page rides along automatically — no admin-console step required.
+
+`controller/misc.go` returns `user_agreement_enabled`, `privacy_policy_enabled`, `usage_policy_enabled` as constant `true`, so the auth-page footer links and the registration consent checkbox always render regardless of admin-console state. The deprecated "paste agreement text into admin console → System Settings → Legal" flow is no longer needed.
 
 ## Image build & ship (Claude has burned on these — don't repeat)
 

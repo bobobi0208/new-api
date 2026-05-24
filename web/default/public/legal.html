@@ -1,0 +1,1063 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fastcc | 服务条款、隐私政策与使用政策</title>
+    <meta
+      name="description"
+      content="fastcc 法律与合规说明页面，包含服务条款、隐私政策与使用政策。"
+    />
+    <style>
+      :root {
+        --bg: #f7f1e7;
+        --paper: rgba(255, 255, 255, 0.86);
+        --paper-strong: #fffaf2;
+        --text: #1f1c16;
+        --muted: #6d655a;
+        --line: rgba(31, 28, 22, 0.1);
+        --brand: #b7791f;
+        --brand-soft: rgba(183, 121, 31, 0.12);
+        --shadow: 0 20px 60px rgba(74, 52, 24, 0.12);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        font:
+          16px/1.75 'PingFang SC',
+          'Noto Sans SC',
+          'Microsoft YaHei',
+          sans-serif;
+        background: radial-gradient(
+            circle at top left,
+            rgba(255, 232, 196, 0.8),
+            transparent 32%
+          ),
+          radial-gradient(
+            circle at bottom right,
+            rgba(255, 214, 153, 0.6),
+            transparent 28%
+          ),
+          linear-gradient(180deg, #fbf7f0 0%, #f4ecdf 100%);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .shell {
+        width: min(1120px, calc(100vw - 32px));
+        margin: 0 auto;
+      }
+
+      .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        backdrop-filter: blur(18px);
+        background: rgba(251, 247, 240, 0.78);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 0;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+      }
+
+      .brand-mark {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        color: var(--brand);
+        background: linear-gradient(135deg, #fff7e7 0%, #f4dbb2 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        font-size: 18px;
+      }
+
+      .nav {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      .nav a {
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        color: var(--muted);
+        background: rgba(255, 255, 255, 0.58);
+      }
+
+      .nav a:hover {
+        border-color: rgba(183, 121, 31, 0.35);
+        color: var(--text);
+      }
+
+      .hero {
+        padding: 72px 0 28px;
+      }
+
+      .hero-wrap {
+        padding: 42px;
+        border: 1px solid rgba(183, 121, 31, 0.12);
+        border-radius: 30px;
+        background: radial-gradient(
+            circle at top center,
+            rgba(255, 242, 214, 0.9),
+            transparent 40%
+          ),
+          var(--paper);
+        box-shadow: var(--shadow);
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 13px;
+        color: var(--brand);
+        background: var(--brand-soft);
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+        line-height: 1.15;
+      }
+
+      h1 {
+        margin-top: 18px;
+        font-size: clamp(38px, 7vw, 72px);
+        letter-spacing: -0.04em;
+      }
+
+      .hero p {
+        max-width: 780px;
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .meta {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 28px;
+      }
+
+      .meta-card {
+        padding: 18px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.72);
+      }
+
+      .meta-card strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+
+      .meta-card span {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      main {
+        padding: 22px 0 72px;
+      }
+
+      .section {
+        margin-top: 22px;
+        padding: 30px;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        background: var(--paper-strong);
+        box-shadow: 0 16px 40px rgba(74, 52, 24, 0.06);
+      }
+
+      .section h2 {
+        font-size: clamp(28px, 3.8vw, 40px);
+        margin-bottom: 10px;
+      }
+
+      .section-intro {
+        margin: 0 0 18px;
+        color: var(--muted);
+      }
+
+      .article-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .card {
+        padding: 22px;
+        border: 1px solid var(--line);
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .card h3 {
+        font-size: 18px;
+        margin-bottom: 12px;
+      }
+
+      .card p,
+      .card ul,
+      .card ol {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .card + .card {
+        margin-top: 0;
+      }
+
+      ul,
+      ol {
+        padding-left: 20px;
+      }
+
+      li + li {
+        margin-top: 8px;
+      }
+
+      .notice {
+        margin-top: 18px;
+        padding: 18px 20px;
+        border-radius: 18px;
+        border: 1px solid rgba(183, 121, 31, 0.18);
+        background: linear-gradient(
+          135deg,
+          rgba(255, 244, 224, 0.95),
+          rgba(255, 250, 241, 0.95)
+        );
+      }
+
+      .notice strong {
+        display: block;
+        margin-bottom: 8px;
+      }
+
+      .footer {
+        padding: 28px 0 44px;
+        border-top: 1px solid var(--line);
+      }
+
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+
+      .footer-brand {
+        color: var(--muted);
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        color: var(--muted);
+      }
+
+      .footer-links a:hover {
+        color: var(--text);
+      }
+
+      /* Long-form legal prose (used by Terms of Service & Usage Policy
+         when we want the full vendor text rather than the card grid). */
+      .long-text h3 {
+        font-size: 20px;
+        margin: 28px 0 10px;
+      }
+
+      .long-text h4 {
+        font-size: 16px;
+        margin: 18px 0 6px;
+        color: var(--text);
+      }
+
+      .long-text p,
+      .long-text li {
+        color: var(--text);
+      }
+
+      .long-text p {
+        margin: 10px 0 14px;
+      }
+
+      .long-text .effective-date {
+        display: inline-block;
+        padding: 6px 12px;
+        margin-bottom: 18px;
+        font-weight: 600;
+        color: var(--brand);
+        background: var(--brand-soft);
+        border-radius: 999px;
+        font-size: 13px;
+      }
+
+      .long-text .callout {
+        margin: 14px 0;
+        padding: 14px 18px;
+        border-left: 3px solid var(--brand);
+        background: rgba(255, 244, 224, 0.6);
+        border-radius: 0 14px 14px 0;
+        color: var(--text);
+      }
+
+      /* Country chip cloud for the supported regions section. */
+      .country-cloud {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .country-cloud span {
+        padding: 6px 12px;
+        font-size: 13px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid var(--line);
+        color: var(--text);
+      }
+
+      @media (max-width: 860px) {
+        .meta,
+        .article-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-wrap,
+        .section {
+          padding: 22px;
+          border-radius: 22px;
+        }
+
+        .topbar-inner,
+        .footer-inner {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="shell topbar-inner">
+        <a class="brand" href="#top">
+          <span class="brand-mark">O</span>
+          <span>fastcc</span>
+        </a>
+        <nav class="nav" aria-label="页面导航">
+          <a href="#user-agreement">服务条款</a>
+          <a href="#privacy-policy">隐私政策</a>
+          <a href="#usage-policy">使用政策</a>
+          <a href="#supported-regions">支持的国家和地区</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="shell">
+      <section class="hero" id="top">
+        <div class="hero-wrap">
+          <div class="eyebrow">fastcc · AI API Gateway 合规说明</div>
+          <h1>服务条款、隐私政策、使用政策与支持地区</h1>
+          <p>
+            本页面用于说明 fastcc 作为 AI
+            中转与接口管理平台的服务边界、数据处理方式、用户合规使用要求，以及当前提供商业
+            API 接入的国家与地区。 用户在注册、登录、充值、调用接口或继续使用
+            fastcc 服务前，应完整阅读并理解以下内容。
+          </p>
+          <div class="meta">
+            <div class="meta-card">
+              <strong>适用对象</strong>
+              <span>fastcc 全部注册用户与访客</span>
+            </div>
+            <div class="meta-card">
+              <strong>服务类型</strong>
+              <span>AI 接口中转、配额管理、调用统计</span>
+            </div>
+            <div class="meta-card">
+              <strong>更新原则</strong>
+              <span>法律、监管、计费或风控调整后即时生效</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main>
+        <section class="section long-text" id="user-agreement">
+          <span id="terms" aria-hidden="true"></span>
+          <h2>服务条款 / 商业服务条款</h2>
+          <span class="effective-date">生效日期：2026年5月13日</span>
+          <p class="section-intro">
+            欢迎使用 fastcc！在访问我们的服务之前，请阅读这些商业服务条款。
+          </p>
+          <p>
+            这些商业服务条款（"条款"）是 fastcc
+            与您或您所代表的组织、公司或其他实体（"客户"）之间的协议。这些条款规定了客户对
+            fastcc API 密钥以及引用这些条款的任何其他 fastcc
+            产品的使用，以及所有相关的 fastcc
+            工具、文档和服务（"服务"）。这些条款自客户首次以电子方式同意这些条款的日期和客户首次访问服务的日期中较早的日期起生效（"生效日期"）。
+          </p>
+          <div class="callout">
+            <strong>请注意：</strong>
+            除非您有法律授权约束该实体，否则您不得代表组织、公司或其他实体接受这些条款。这些条款下的服务不适用于消费者使用。
+          </div>
+
+          <h3>A. 服务</h3>
+          <p>
+            <strong>概述。</strong>
+            根据这些条款，fastcc
+            授予客户使用服务的权限，包括为客户向其自己的客户和最终用户（"用户"）提供的产品和服务提供支持。
+          </p>
+          <p>
+            <strong>第三方功能。</strong>
+            客户可以自行选择使用第三方通过服务向客户提供的功能、服务或其他内容（"第三方功能"）。客户承认并同意，第三方功能不是服务，因此
+            fastcc
+            不对其负责。第三方模型、云平台、模型市场、API、兼容接口、支付渠道、身份验证服务或其他第三方产品可能受其自身条款、政策、地区限制、价格、文档和可用性约束；该等第三方产品的变更、暂停、终止、模型下线、输出拦截、价格调整或服务不可用可能影响客户使用服务。
+          </p>
+          <p>
+            <strong>反馈。</strong>
+            如果客户（自行决定）向 fastcc 提供有关服务的反馈，fastcc
+            可以自行承担风险使用该反馈，而无需对客户承担任何义务。
+          </p>
+
+          <h3>B. 客户内容</h3>
+          <p>
+            在各方之间以及在适用法律允许的范围内，fastcc
+            同意客户（a）保留其输入的所有权利，（b）拥有其输出。fastcc
+            放弃其根据这些条款收到的客户内容的任何权利。在客户遵守这些条款的前提下，fastcc
+            特此将其在输出中的权利、所有权和利益（如果有）转让给客户。fastcc
+            不会使用来自服务的客户内容训练模型。"输入"是指客户或其用户向服务提交的内容，"输出"是指服务针对输入生成的响应（输入和输出统称为"客户内容"）。
+          </p>
+
+          <h3>C. 数据隐私</h3>
+          <p>
+            通过服务提交的数据将根据 fastcc
+            数据处理附录（"DPA"）进行处理，该附录通过引用纳入这些条款。
+          </p>
+
+          <h3>D. 信任与安全；限制</h3>
+          <p>
+            <strong>合规性。</strong>
+            各方将遵守适用于提供（fastcc）和使用（客户）服务的所有法律，包括任何适用的数据隐私法律。
+          </p>
+          <p>
+            <strong>政策和服务条款。</strong>
+            客户及其用户只能在遵守这些条款的情况下使用服务，包括（a）使用政策（"使用政策"），（b）我们关于
+            fastcc
+            当前支持的国家和地区的政策（"支持区域政策"）和（c）我们的服务特定条款，这些条款均通过引用纳入这些条款。客户还必须遵守适用于客户所选择第三方功能或上游服务的服务条款、使用政策、支持地区政策、服务特定条款、数据处理条款、模型定价、API
+            文档和其他被该等第三方纳入的政策。客户必须配合 fastcc
+            的合理信息请求，以支持遵守其使用政策，包括验证客户的身份、服务使用、最终用户、使用场景和合规状态。
+          </p>
+          <p>
+            <strong>输出的局限性；对用户的通知。</strong>
+            客户有责任在使用或共享输出之前评估输出是否适合客户的用例，包括在适当的情况下进行人工审查。客户承认并必须通知其用户，不应在未独立检查其准确性的情况下依赖输出中的事实断言，因为它们可能是虚假的、不完整的、误导性的或不反映最近的事件或信息。客户还承认，输出可能包含与
+            fastcc
+            观点不一致的内容。如果客户将服务嵌入其自身产品、代理、机器人、客户端、插件、平台或其他面向用户的服务中，客户负责向其用户提供适当披露，并负责其用户、下游客户、代理、员工、承包商和集成方对服务的使用。
+          </p>
+          <p>
+            <strong>使用限制。</strong>
+            客户不得且不得试图（a）访问或使用服务、输入、输出、响应模式或模型行为来构建竞争产品或服务，包括训练、微调、蒸馏、评估、对标或改进竞争
+            AI 模型，或转售服务，除非 fastcc
+            明确批准；（b）对服务进行逆向工程、复制、抓取、批量提取、绕过速率限制或规避服务保护措施；或（c）支持任何第三方尝试本句中限制的任何行为。
+          </p>
+          <p>
+            <strong>服务帐户。</strong>
+            客户对其帐户下的所有活动负责，包括使用客户账户、API
+            密钥、组织、项目、令牌或其他凭据进行的活动。客户必须采取合理措施保护其凭据，并确保其用户和下游集成方遵守这些条款。如果客户认为其用于访问服务的帐户或凭据已被泄露，或受到拒绝服务或类似恶意攻击，可能对服务产生负面影响，客户将立即通知
+            fastcc。
+          </p>
+
+          <h3>E. 保密</h3>
+          <p>
+            <strong>保密信息。</strong>
+            各方可能会共享被识别为机密、专有或类似的信息，或各方合理理解为机密或专有的信息（"保密信息"）。客户内容是客户的保密信息。
+          </p>
+          <p>
+            <strong>各方的义务。</strong>
+            接收方（"接收方"）只能使用披露方（"披露方"）的保密信息来行使其权利并履行其在这些条款下的义务。接收方只能与需要知道此类保密信息并受至少与这些条款中提供的保密义务一样严格的保密义务约束的接收方的员工、代理和顾问（"代表"）共享披露方的保密信息。接收方将以保护其自己的保密信息的相同方式保护披露方的保密信息免遭未经授权的使用、访问或披露，并且不低于合理的注意。接收方对其代表的所有作为和不作为负责。
+          </p>
+          <p>
+            <strong>排除。</strong>
+            保密信息不包括以下信息：（a）非因接收方的过错而公开；（b）接收方从第三方获得而不违反第三方的保密义务；或（c）接收方独立开发而不使用保密信息。接收方可以在法律或法院或行政命令要求的范围内披露披露方的保密信息，并且除非明确禁止，否则将立即通知披露方所需的披露，并充分配合披露方防止或缩小披露范围的努力。
+          </p>
+          <p>
+            <strong>销毁请求。</strong>
+            接收方将根据请求立即销毁披露方的保密信息，除非需要保留以遵守法律或接收方自动备份系统中的副本，这些副本在维护期间将继续受这些保密义务的约束。
+          </p>
+
+          <h3>F. 知识产权</h3>
+          <p>
+            除这些条款中明确规定外，这些条款不授予任何一方对另一方内容或知识产权的任何权利，无论是暗示的还是其他方式。
+          </p>
+
+          <h3>G. 宣传</h3>
+          <p>
+            fastcc
+            可以使用客户的名称和徽标公开识别客户为服务的客户；前提是客户可以通过提交请求表单选择退出。客户将善意考虑
+            fastcc 的任何请求，以（1）提供客户高管关于客户使用服务动机的引述，fastcc
+            可以公开使用，以及（2）参与公开联合营销活动。
+          </p>
+
+          <h3>H. 费用</h3>
+          <p>
+            <strong>费用支付。</strong>
+            客户负责其帐户产生的费用，费率在模型定价页面上指定，除非各方另有约定。fastcc
+            可能会要求以积分形式预付服务费用或提供其他类型的积分，所有这些都受
+            fastcc 补充积分条款的约束。fastcc
+            可能会更新已发布的费率，在 fastcc 发布更新后 30
+            天或客户以其他方式收到通知后的较早日期生效。
+          </p>
+          <p>
+            <strong>税费。</strong>
+            费用不包括客户因使用服务可能欠的任何税费、关税或评估（"税费"），除非在适用发票中另有说明。客户负责及时向相关机构汇出任何必要的预扣税，并应要求向
+            fastcc
+            提供证据。如果法律规定减少或免除预扣税，包括通过税收协定，各方将善意合作实现这一目标。为清楚起见，客户必须向
+            fastcc 支付将确保 fastcc
+            收到与如果客户不需要进行此类预扣或减少时将收到的相同总金额的金额（"补足付款"）（考虑到所有适用的税费（包括对补足付款征收的任何税费））。
+          </p>
+          <p>
+            <strong>计费。</strong>
+            未能在到期时向 fastcc
+            支付所有欠款可能会导致客户访问服务被暂停或终止。fastcc
+            保留其可能拥有的任何其他收款权利。
+          </p>
+          <h4>退款政策</h4>
+          <ul>
+            <li>
+              <strong>退款范围：</strong>
+              基于客户自身意愿变更（包括但不限于不再需要服务、使用计划调整等）的退款申请，fastcc
+              有权予以拒绝。客户或其用户因违反这些条款、使用政策、服务特定条款或使用限制而被限制、暂停、终止或产生费用的，相关退款申请也可能被拒绝；该等违规包括但不限于未经授权使用服务、输入、输出、响应模式或模型行为进行模型抓取、复制、训练、微调、蒸馏、评估、对标或改进竞争模型。已产生、已消耗或因违规行为造成的费用和积分不予退还。
+            </li>
+            <li>
+              <strong>退款方式：</strong>
+              订单付款后 90
+              天内的退款申请，退款将通过原支付渠道退回。订单付款超过 90
+              天的退款申请，退款无法原路退回，客户需提供替代收款方式。
+            </li>
+            <li>
+              <strong>审核与材料：</strong>
+              所有退款申请均须经过 fastcc
+              审核。客户须提交以下材料：（a）原始付款凭证（如支付截图、交易流水号等）；（b）与付款账户一致的身份信息；（c）对于无法原路退回的订单，须提供与付款人身份一致的收款账户信息。fastcc
+              有权要求客户提供额外的身份证明或交易证明材料。
+            </li>
+            <li>
+              <strong>反欺诈：</strong>
+              为防止欺诈和洗钱行为，fastcc
+              保留对退款申请进行额外审查的权利，包括但不限于验证付款人与收款人的身份一致性。如发现退款申请存在欺诈嫌疑，fastcc
+              有权拒绝退款并暂停相关账户。
+            </li>
+            <li>
+              <strong>最终解释权：</strong>
+              fastcc 保留对退款政策的最终解释权，并有权拒绝不符合退款条件的申请。
+            </li>
+          </ul>
+
+          <h3>I. 终止和暂停</h3>
+          <p>
+            <strong>期限。</strong>
+            这些条款从生效日期开始，并持续到终止（"期限"）。
+          </p>
+          <h4>终止</h4>
+          <ul>
+            <li>
+              任何一方均可随时出于便利原因通过通知终止这些条款，但 fastcc
+              必须提前 30 天通知。
+            </li>
+            <li>
+              任何一方均可通过提前 30
+              天通知详细说明违约性质来终止另一方的重大违约行为，除非在该时间内得到纠正。
+            </li>
+            <li>
+              如果 fastcc 合理认为或确定 fastcc
+              向客户提供服务被适用法律禁止，fastcc 可以立即通过通知终止这些条款。
+            </li>
+          </ul>
+          <h4>暂停</h4>
+          <p>
+            fastcc
+            可以暂停客户对任何部分或全部服务的访问，如果：（a）fastcc
+            合理认为或确定（i）对任何服务存在风险或攻击；（ii）客户或任何用户正在违反第
+            D.1 节（合规性）、第 D.2 节（政策和服务条款）或第 D.4
+            节（使用限制）的情况下使用服务；或（iii）fastcc
+            向客户提供服务被适用法律禁止或会导致提供服务的成本大幅增加；或（b）任何供应商暂停或终止
+            fastcc
+            使用使客户能够访问服务所需的任何第三方服务或产品（每种情况称为"服务暂停"）。
+          </p>
+          <p>
+            为遵守法律、政策、第三方服务条款或安全要求，fastcc
+            也可以限制、拒绝、阻断、过滤、修改或中断违反这些条款或使用政策的输入、输出、账户、API
+            密钥、通道或相关请求。
+          </p>
+          <p>
+            fastcc
+            将尽合理努力向客户提供任何服务暂停的书面通知，并在引起服务暂停的事件得到纠正（如果可以纠正）后尽快恢复对服务的访问。fastcc
+            对客户因服务暂停而可能遭受的任何损害、责任、损失（包括任何数据或利润损失）或任何其他后果不承担任何责任。
+          </p>
+          <p>
+            <strong>终止的效力。</strong>
+            终止后，客户可能无法再访问服务。以下条款将在终止或到期后继续有效：（a）第
+            E 节（保密）、第 G 节（宣传）、第 H 节（费用）、第 I
+            节（终止和暂停）、第 J 节（争议）、第 K 节（赔偿）、第 L.2
+            节（免责声明）、第 L.3 节（责任限制）和第 M
+            节（杂项）；（b）任何必须继续有效以实现其基本目的的条款或条件。
+          </p>
+
+          <h3>J. 争议</h3>
+          <p>
+            <strong>争议。</strong>
+            如果发生与这些条款有关的争议、索赔或争议（"争议"），各方将首先尝试善意地以非正式方式解决该问题。提出争议的一方必须通知另一方（"争议通知"）。另一方将及时回复争议通知。如果各方在发出争议通知后
+            45 天内未能解决争议，任何一方均可通过第 J.2 节（仲裁）中规定的仲裁来解决争议。
+          </p>
+          <p>
+            <strong>仲裁。</strong>
+            任何争议将通过以下特定地区流程以英语进行最终约束性仲裁。对本第 J.2
+            节（仲裁）通过仲裁程序发出的任何裁决的判决可以在具有管辖权的任何法院作出。各方同意，他们在与这些条款相关的法律允许的最大范围内放弃陪审团审判的权利以及加入和参与集体诉讼的权利。
+          </p>
+          <p>
+            <strong>衡平法救济。</strong>
+            本第 J 节（争议）不限制任何一方寻求衡平法救济。
+          </p>
+
+          <h3>K. 赔偿</h3>
+          <p>
+            <strong>针对客户的索赔。</strong>
+            fastcc
+            将为客户及其人员、继承人和受让人辩护，使其免受任何客户索赔（如下定义），并对法院对此类客户索赔授予第三方的任何判决或仲裁员根据任何
+            fastcc
+            批准的和解对此类客户索赔授予第三方的任何裁决进行赔偿。"客户索赔"是指第三方索赔、诉讼或程序，声称客户根据这些条款付费使用服务（包括
+            fastcc 用于训练作为服务一部分的模型的数据）或通过此类授权使用生成的输出侵犯了任何第三方知识产权。
+          </p>
+          <p>
+            <strong>针对 fastcc 的索赔。</strong>
+            客户将为 fastcc
+            及其人员、继承人和受让人辩护，使其免受任何 fastcc
+            索赔（如下定义），并对法院对此类 fastcc
+            索赔授予第三方的任何判决或仲裁员根据任何客户批准的和解对此类
+            fastcc 索赔授予第三方的任何裁决进行赔偿。"fastcc
+            索赔"是指与客户或其用户的（a）输入或客户提供的其他数据，或（b）违反使用政策、服务特定条款或第
+            D.4 节（使用限制）使用服务有关的任何第三方索赔、诉讼或程序。fastcc
+            索赔和客户索赔各自适用时称为"索赔"。
+          </p>
+          <p>
+            <strong>排除。</strong>
+            如果基础指控源于受赔偿方的欺诈、故意不当行为、违反法律或违反协议，则任何一方的辩护或赔偿义务均不适用。此外，如果客户索赔源于以下情况，fastcc
+            的辩护和赔偿义务将不适用：（a）客户对服务或输出的修改；（b）服务或输出与
+            fastcc
+            未提供的技术或内容的结合；（c）客户提供的输入或其他数据；（d）客户知道或应该合理知道侵犯或侵犯他人权利的服务或输出的使用；（e）对输出中包含的专利发明的实践；或（f）基于在贸易或商业中使用输出的商标侵权指控。
+          </p>
+          <p>
+            <strong>流程。</strong>
+            受赔偿方必须立即通知赔偿方相关索赔，并将合理配合辩护。赔偿方将保留对任何此类索赔的辩护的控制权，包括律师的选择、任何诉讼或上诉的策略和过程以及任何谈判或和解或妥协，除非受赔偿方有权（不得无理行使）拒绝任何要求其承认不当行为或责任或使其承受持续积极义务的和解或妥协。如果以下任何一项对辩护造成重大损害，赔偿方的义务将被免除：（a）受赔偿方未能及时通知索赔；或（b）未能合理配合辩护。
+          </p>
+          <p>
+            <strong>唯一救济。</strong>
+            在本第 K
+            节（赔偿）涵盖的范围内，赔偿是各方根据这些条款对任何第三方索赔的唯一和排他性救济。
+          </p>
+
+          <h3>L. 担保和责任限制</h3>
+          <p>
+            <strong>担保。</strong>
+            各方表示并保证（a）它有权订立这些条款；并且（b）订立和履行这些条款不会违反其任何公司规则（如适用）。客户进一步表示并保证其拥有向服务提交输入所需的所有权利和许可。
+          </p>
+          <p>
+            <strong>免责声明。</strong>
+            除这些条款中明确规定的范围外，在法律允许的最大范围内（A）服务和输出按"原样"和"可用"提供，不提供任何形式的保证；并且（B）fastcc
+            不对第三方产品或服务（包括第三方接口）作出任何保证，无论是明示的还是暗示的。fastcc
+            明确否认所有暗示保证，包括适销性、不侵权和特定用途适用性的保证，以及源于法规、交易过程或履行或贸易使用的任何暗示保证。fastcc
+            不保证也不声明服务或输出是准确的、完整的或无错误的，或者它们的使用将不会中断。输出中对第三方的引用可能并不意味着他们认可或以其他方式与
+            fastcc 合作。
+          </p>
+          <h4>责任限制</h4>
+          <ul>
+            <li>
+              除第 L.3.b
+              节规定外，各方及其关联公司和许可方因这些条款产生或与之相关的任何损害的责任（i）不包括间接、偶然、特殊、间接或惩戒性损害，包括利润损失、业务、合同、收入、商誉、生产、预期储蓄或数据，以及采购替代商品或服务的成本，并且（ii）限于客户在前
+              12 个月内为服务支付的费用。
+            </li>
+            <li>
+              本第 L.3 节（责任限制）中的责任限制不适用于任何一方在第 K
+              节（赔偿）下的义务。
+            </li>
+            <li>
+              本第 L.3
+              节（责任限制）中的责任限制适用：（I）在适用法律允许的最大范围内；（II）对包括过失在内的侵权责任；（III）无论诉讼形式如何，无论是合同、侵权、严格产品责任还是其他；（IV）即使违约方事先被告知相关损害的可能性，即使此类损害是可预见的；并且（E）即使受伤方的救济未能达到其基本目的。
+            </li>
+            <li>
+              各方同意，他们是依赖本第 L.3
+              节（责任限制）的条款订立这些条款的，这些条款构成各方之间议价的基本基础。
+            </li>
+          </ul>
+
+          <h3>M. 杂项</h3>
+          <p>
+            <strong>通知。</strong>
+            这些条款下的所有通知、要求、弃权和其他通信（每个称为"通知"）必须以书面形式。除与要求仲裁或寻求衡平法救济有关的通知外，根据这些条款提供的任何通知如果是客户，可以通过电子方式发送到提供给
+            fastcc 的地址；如果是 fastcc，则发送到 support@fastcc.com。通知仅在以下情况下有效：（a）接收方收到后，并且（b）如果发出通知的一方已遵守本第
+            M.1 节（通知）的所有要求。
+          </p>
+          <p>
+            <strong>电子通信。</strong>
+            客户同意根据客户对服务的使用以及与这些条款相关的从 fastcc
+            接收电子通信。除非适用法律禁止，否则电子通信可以通过电子邮件、服务或客户的管理仪表板或在
+            fastcc 的网站上发布。fastcc
+            还可以通过短信或短信提供有关客户使用服务的电子通信，或根据客户从 fastcc
+            请求的其他方式提供。如果客户希望停止接收此类消息，客户可以从 fastcc
+            请求或使用"STOP"回复任何此类短信。
+          </p>
+          <p>
+            <strong>修订和修改。</strong>
+            fastcc 可以随时更新这些条款，在 fastcc 发布更新后 30
+            天或客户以其他方式收到通知后生效，但响应法律或法规变化而进行的更新在发布或通知后立即生效。更改不会追溯适用。除非是书面形式并由双方签署，否则对这些条款的任何其他修订或修改均无效。未能行使或延迟行使这些条款产生的任何权利或救济不会也不会被解释为弃权；并且任何权利或救济的单一或部分行使不会排除将来行使此类权利或救济。
+          </p>
+          <p>
+            <strong>转让和委托。</strong>
+            未经另一方事先书面同意，任何一方均不得转让其权利或委托其在这些条款下的义务，但
+            fastcc
+            可以将其权利转让并将其义务委托给关联公司或作为出售其全部或几乎全部业务的一部分。除上述许可外，任何声称的转让或委托均为无效。任何被许可的转让或委托都不会减轻签约方或受让人在这些条款下的义务。这些条款将约束各方及其各自被许可的继承人和受让人并对其有利。
+          </p>
+          <p>
+            <strong>可分割性。</strong>
+            如果这些条款的任何条款在任何管辖区无效、非法或不可执行，则此类无效、非法或不可执行性既不会影响这些条款的任何其他条款，也不会使此类条款或条款在任何其他管辖区无效或不可执行。在确定任何条款或其他条款无效、非法或不可执行后，各方将善意谈判以修改这些条款，以尽可能接近反映各方的原始意图。
+          </p>
+          <p>
+            <strong>解释。</strong>
+            这些条款将相互解释，任何一方均不被视为起草者。文件和章节标题是为了方便而提供的，不会被解释。短语"例如"或"包括"或"或"不是限制性的。
+          </p>
+          <h4>管辖法律；地点</h4>
+          <ul>
+            <li>
+              这些条款受管辖法律管辖并根据管辖法律解释，不考虑任何法律选择条款。"管辖法律"是指美国特拉华州法律。
+            </li>
+            <li>
+              与这些条款相关的任何不需要根据第 J
+              节（争议）通过仲裁解决的诉讼、诉讼或程序将专门在地点提起，并且各方不可撤销地服从其专属管辖权。"地点"是指美国特拉华州法院。
+            </li>
+          </ul>
+          <p>
+            <strong>出口和制裁。</strong>
+            客户不得出口或提供对服务的访问权限给被美国或其他适用国际法禁止的人员或实体或进入国家或用于被禁止的用途。在不限制前述句子的情况下，此限制适用于（a）从美国出口或进入该国将被禁止或非法而不首先获得适当许可证的国家，以及（b）受美国制裁覆盖的人员、实体或国家。
+          </p>
+          <p>
+            <strong>整合。</strong>
+            这些条款（包括使用政策、支持区域政策、服务特定条款、DPA、模型定价页面和这些条款通过引用纳入的其他文件或条款）构成各方对服务提供和使用的完整理解。这些条款取代各方之间关于服务的所有其他理解或协议。
+          </p>
+          <p>
+            <strong>不可抗力。</strong>
+            任何一方均不对因其合理控制之外的情况导致的履行失败或延迟承担责任。
+          </p>
+          <div class="notice">
+            <strong>重点提醒</strong>
+            用户继续使用
+            fastcc，即视为同意本服务条款，并认可平台可基于合规、安全、风控和运营需要对账户及请求进行必要管理。
+          </div>
+        </section>
+
+        <section class="section" id="privacy-policy">
+          <span id="privacy" aria-hidden="true"></span>
+          <h2>隐私政策</h2>
+          <p class="section-intro">
+            fastcc
+            仅在提供服务、保障安全、完成计费和履行法定义务所必需的范围内收集和处理信息，不以出售个人信息为业务模式。
+          </p>
+          <div class="article-grid">
+            <article class="card">
+              <h3>1. 收集的信息</h3>
+              <ul>
+                <li>
+                  账号信息：邮箱、用户名、登录时间、IP
+                  地址、设备与浏览器基础信息。
+                </li>
+                <li>
+                  调用信息：模型名称、请求时间、接口路径、用量统计、错误日志、余额与账单信息。
+                </li>
+                <li>
+                  安全信息：异常访问、频率触发、风控标记、封禁与申诉记录。
+                </li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>2. 使用目的</h3>
+              <ul>
+                <li>完成登录验证、额度扣减、支付对账、工单支持和服务优化。</li>
+                <li>识别攻击、滥用、撞库、刷量、诈骗等高风险行为。</li>
+                <li>满足税务、审计、监管或司法协助等合法合规要求。</li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>3. 对外提供与存储</h3>
+              <ul>
+                <li>fastcc 不会擅自出售用户个人信息。</li>
+                <li>
+                  在支付、云基础设施、邮件短信、风控、日志托管等必要场景下，可能向服务商提供最小必要信息。
+                </li>
+                <li>
+                  当法律法规、监管机关或司法机关要求时，平台可依法提供必要信息与日志。
+                </li>
+              </ul>
+            </article>
+            <article class="card">
+              <h3>4. 用户权利与限制</h3>
+              <ul>
+                <li>
+                  用户可申请查询、更正、注销账号，但涉及法定留存、财务对账、风控审计的数据，平台可在法律允许范围内继续保留。
+                </li>
+                <li>
+                  用户不得上传、输入、传输涉密、侵权、违法或无权处理的数据。
+                </li>
+                <li>用户应自行确认所提交数据具有合法来源和处理权限。</li>
+              </ul>
+            </article>
+          </div>
+          <div class="notice">
+            <strong>数据安全说明</strong>
+            fastcc
+            将采取合理的技术和管理措施保护数据安全，但互联网传输与存储无法做到绝对无风险。若发生安全事件，平台将依法采取处置措施。
+          </div>
+        </section>
+
+        <section class="section long-text" id="usage-policy">
+          <span id="usage" aria-hidden="true"></span>
+          <h2>使用政策</h2>
+          <span class="effective-date">生效日期：2026年5月13日</span>
+          <p class="section-intro">
+            我们的使用政策（也称为"可接受使用政策"或"AUP"）适用于任何可以向
+            fastcc
+            的产品和/或服务提交输入的人，包括通过任何授权经销商或直通访问，我们将所有这些人称为"用户"。使用政策旨在帮助我们的用户保持安全并促进负责任地使用我们的产品和服务。
+          </p>
+          <p>
+            使用政策根据谁可以使用我们的产品以及出于什么目的进行分类。随着我们的技术和相关风险的发展或我们了解意外风险，我们将更新我们的政策。为执行本政策，fastcc
+            可以使用检测、审查和监控机制；如果用户违反本政策，fastcc
+            可以限制、暂停或终止访问，也可以阻止、过滤或修改违反本政策的输入或输出。
+          </p>
+
+          <h3>通用使用标准</h3>
+          <p>我们的通用使用标准适用于所有用户和所有用例。</p>
+
+          <h4>不得违反适用法律或从事非法活动</h4>
+          <p>
+            不得使用我们的服务从事、促进或鼓励非法活动，包括受控物质交易、人口贩运、卖淫、侵犯知识产权、虐待、剥削、伤害或试图伤害儿童，以及其他违反适用法律法规的行为。
+          </p>
+
+          <h4>不得危害关键基础设施</h4>
+          <p>
+            不得使用我们的服务来伤害、破坏或扰乱关键基础设施，包括但不限于电信、医疗保健、能源、运输、供水、金融服务、选举基础设施、医疗设备、金融市场和军事基地。
+          </p>
+
+          <h4>不得危害计算机或网络系统</h4>
+          <p>
+            不得使用我们的服务开发、部署、协助或自动化未经授权利用漏洞、社会工程、恶意软件、勒索软件、拒绝服务攻击、僵尸网络工具、未经授权拦截通信或监控设备、建立持久化访问、执行大规模损害计算机系统或网络的自动化操作，或帮助绕过安全控制。
+          </p>
+
+          <h4>不得开发或设计武器</h4>
+          <p>
+            不得使用我们的服务开发、设计、生产、测试、营销或非法获取武器、爆炸物或危险材料，也不得提供武器化、递送机制、规避安全控制、采购前体或改进武器能力的指导。不得使用我们的服务开发军事应用、监控技术或以其他方式伤害人类的其他技术，包括设计、开发、生产或测试核、生物、化学或辐射武器、军用级网络能力、导弹、无人机或自主武器系统。
+          </p>
+
+          <h4>不得煽动暴力或仇恨行为</h4>
+          <p>
+            不得使用我们的服务煽动、促进、宣传或美化针对个人或群体的极端暴力或基于身份的暴力，也不得宣传、美化、促进或提倡针对受保护群体的仇恨，或从事基于受保护属性的歧视、恐吓、去人性化或暴力行为。
+          </p>
+
+          <h4>不得侵犯隐私或身份权利</h4>
+          <p>
+            不得使用我们的服务从事、促进、煽动或促使跟踪、骚扰、欺凌或其他形式的骚扰，或通过其他非法或未经授权的方式危害或侵犯人们的隐私权、公开权或其他法律权利，包括创建用于识别私人或受限区域中的人的面部识别系统，或在未经同意的情况下收集、共享、获取或使用私人信息、联系信息、健康信息、生物识别信息、神经数据、机密信息或其他个人数据。
+          </p>
+
+          <h4>不得危害儿童安全</h4>
+          <p>
+            不得使用我们的服务创建、获取或传播虐待、剥削或性化未成年人的内容，包括但不限于性虐待儿童材料（CSAM）、诱导性交流、性勒索、帮助隐藏儿童虐待的建议、将未成年人置于性语境中的角色扮演或描述，或任何赞美、美化或鼓励对儿童进行性虐待的内容。
+          </p>
+
+          <h4>不得创建心理或情感上有害的内容</h4>
+          <p>
+            不得使用我们的服务自动生成或传播旨在对人们造成心理或情感伤害的内容，包括促进自残或自杀、饮食失调、不健康运动或无法达到的身体形象，或通过欺凌、骚扰、虐待、羞辱、恐吓或有针对性的骚扰造成伤害。
+          </p>
+
+          <h4>不得创建或传播错误信息</h4>
+          <p>
+            不得使用我们的服务大规模创建或传播经济、政治、社会或公共卫生伤害的虚假、不准确、误导或欺骗性内容，包括关于群体、实体或个人的欺骗性信息，或关于公共卫生紧急情况、公民程序、法律、法规、程序、标准或政治或公民领导人的此类内容。
+          </p>
+
+          <h4>不得破坏民主进程或参与有针对性的竞选活动</h4>
+          <p>
+            不得使用我们的服务破坏、损害或破坏公平和开放的民主或公民进程，包括通过虚假信息的分发、针对性地压制投票、制造虚假公众运动、批量联系选民或公职人员并隐瞒自动化来源，或干扰投票、计票或认证流程。不得使用我们的服务进行政治竞选或游说，或生成旨在大规模影响政治、司法、社会或经济结果的竞选材料，包括宣传活动的输出、带有政治意见的个性化或有针对性的信息、交互式竞选活动聊天机器人、误导性的政治合成媒体或选民压制材料。
+          </p>
+
+          <h4>不得用于刑事司法、审查、监视或被禁止的执法目的</h4>
+          <p>
+            不得使用我们的服务进行任何预测性警务、起诉、量刑、假释或拘留决定、测谎或类似应用、面部识别、情绪识别、社会评分、政府审查、战场管理、未经同意的通信或位置跟踪、用于推断受保护属性的生物识别分类、或大规模监视或任何其他被禁止的执法目的。
+          </p>
+
+          <h4>不得从事欺诈、滥用或掠夺性做法</h4>
+          <p>
+            不得使用我们的服务创建或传播欺诈性、虚假或误导性内容，旨在欺骗、欺诈或剥削人们，包括但不限于计划、诈骗、钓鱼、伪造文件、虚假产品、虚假评论、虚假互动、垃圾邮件和其他欺诈行为。不得使用我们的服务冒充个人、组织、实体或真实公共人物以欺骗、误导或欺诈他人。不得使用我们的服务进行或促进赌博、发薪日贷款、高成本信贷产品、剥削性债务催收或其他剥削性经济活动。不得使用我们的服务进行其他非法、欺诈或欺骗性活动，或生成或传播垃圾邮件。
+          </p>
+
+          <h4>不得滥用我们的平台</h4>
+          <p>
+            不得违反我们的平台政策使用我们的服务，包括但不限于尝试破坏我们的保护措施，逃避模型的内置限制，以任何未经授权的方式提取模型权重、系统提示、隐藏规则、训练数据或响应模式，进行越狱、提示注入、未经授权的模型抓取、复制、训练、微调或蒸馏，或违反我们在
+            fastcc 上实施的服务使用限制，包括费率限制。
+          </p>
+
+          <h4>不得生成性露骨内容</h4>
+          <p>
+            不得使用我们的服务生成性露骨内容，包括有露骨目的或性满足的内容。这包括使用我们的服务生成色情内容（无论是文本还是图像）、露骨性行为、性癖、性幻想、色情聊天或近亲性内容。此限制不适用于使用我们的服务进行合法的性和生殖健康用途、科学、教育或艺术用途的内容。
+          </p>
+
+          <h3>高风险用例要求</h3>
+          <p>
+            某些用例由于影响对公共福利和社会公平至关重要的领域而构成更高的伤害风险。对于这些用例，鉴于对个人和消费者的潜在风险，我们认为应整合相关的人类专业知识，并且最终用户应该意识到
+            AI 何时参与产生输出。
+          </p>
+          <p>
+            因此，对于下面描述的"高风险用例"，我们要求您实施这些额外的安全措施：
+          </p>
+          <div class="callout">
+            <p>
+              <strong>人在回路中：</strong>
+              在使用我们的产品或服务提供直接影响个人或消费者的建议、推荐或主观决策时，该领域的合格专业人员必须在传播或最终确定之前审查内容或决策。您或您的组织对该信息的准确性和适当性负责。
+            </p>
+            <p>
+              <strong>披露：</strong>
+              如果模型输出直接呈现给个人或消费者，您必须向他们披露您正在使用 AI
+              来帮助生成您的建议、决策或推荐。此披露必须至少在每个会话开始时提供。
+            </p>
+          </div>
+          <p><strong>"高风险用例"包括：</strong></p>
+          <ul>
+            <li>
+              <strong>法律：</strong>
+              与法律解释、法律指导或具有法律影响的决策有关的用例。
+            </li>
+            <li>
+              <strong>医疗保健：</strong>
+              与医疗保健决策、医疗诊断、患者护理、治疗、心理健康或其他医疗指导有关的用例。健康建议（例如，关于睡眠、压力、营养、锻炼等的建议）不属于此类别。
+            </li>
+            <li>
+              <strong>保险：</strong>
+              与健康、人寿、财产、残疾或其他类型的保险承保、索赔处理或承保决策有关的用例。
+            </li>
+            <li>
+              <strong>金融：</strong>
+              与财务决策有关的用例，包括投资建议、贷款批准和确定财务资格或信用 worthiness。
+            </li>
+            <li>
+              <strong>就业和住房：</strong>
+              与有关个人就业能力的决策、简历筛选、招聘工具或其他就业决定或关于住房资格的决策（包括租赁和住房贷款）有关的用例。
+            </li>
+            <li>
+              <strong>学术测试、认证和录取：</strong>
+              与管理学校录取（包括评估、评分或排名潜在学生）、语言能力或专业认证考试的标准化测试公司有关的用例；评估和认证教育机构的机构。
+            </li>
+            <li>
+              <strong>媒体或专业新闻内容：</strong>
+              与使用我们的产品或服务自动生成内容并将其发布以供外部消费有关的用例。
+            </li>
+          </ul>
+
+          <h3>其他用例指南</h3>
+          <p>
+            以下用例——无论它们是否是高风险用例——必须遵守提供的其他指南。
+          </p>
+          <ul>
+            <li>
+              所有面向消费者的聊天机器人，包括任何面向外部或交互式 AI
+              代理，必须向用户披露他们正在与 AI
+              而不是人类交互。此披露必须至少在每次聊天会话开始时提供。
+            </li>
+            <li>
+              服务未成年人的产品，包括为未成年人提供直接与包含我们 API
+              的产品交互能力的组织，必须遵守我们帮助中心文章中概述的附加指南。
+            </li>
+            <li>
+              代理用例仍必须遵守使用政策。我们在帮助中心文章中提供了在代理用例背景下使用政策禁止的示例。
+            </li>
+            <li>
+              我们连接器目录中列出的模型上下文协议（MCP）服务器必须遵守我们的目录政策。
+            </li>
+          </ul>
+
+          <div class="notice">
+            <strong>零容忍规则</strong>
+            涉黄赌毒、诈骗及其他高风险违法用途一经发现，fastcc
+            可立即中止服务、保全证据并依法向相关机关提供线索。
+          </div>
+        </section>
+
+        <section class="section long-text" id="supported-regions">
+          <h2>支持的国家和地区</h2>
+          <span class="effective-date">生效日期：2025年10月30日</span>
+          <p class="section-intro">商业 API 访问和 fastcc 服务。</p>
+          <p>
+            在法律允许的范围内，fastcc
+            保留不向除我们支持区域政策中列出的国家以外的其大部分直接或间接所有权归属于国家的实体提供其产品或服务的权利。
+          </p>
+
+          <h3>API</h3>
+          <p>我们目前提供商业 API 访问的国家、地区和领土：</p>
+          <div class="country-cloud">
+            <span>阿尔巴尼亚</span><span>阿尔及利亚</span><span>安道尔</span><span>安哥拉</span><span>安提瓜和巴布达</span><span>阿根廷</span><span>亚美尼亚</span><span>澳大利亚</span><span>奥地利</span><span>阿塞拜疆</span><span>巴哈马</span><span>巴林</span><span>孟加拉国</span><span>巴巴多斯</span><span>比利时</span><span>伯利兹</span><span>贝宁</span><span>不丹</span><span>玻利维亚</span><span>波斯尼亚和黑塞哥维那</span><span>博茨瓦纳</span><span>巴西</span><span>文莱</span><span>保加利亚</span><span>布基纳法索</span><span>布隆迪</span><span>佛得角</span><span>柬埔寨</span><span>喀麦隆</span><span>加拿大</span><span>乍得</span><span>智利</span><span>哥伦比亚</span><span>科摩罗</span><span>刚果（布拉柴维尔）</span><span>哥斯达黎加</span><span>科特迪瓦</span><span>克罗地亚</span><span>塞浦路斯</span><span>捷克</span><span>丹麦</span><span>吉布提</span><span>多米尼克</span><span>多米尼加共和国</span><span>厄瓜多尔</span><span>埃及</span><span>萨尔瓦多</span><span>赤道几内亚</span><span>爱沙尼亚</span><span>斯威士兰</span><span>斐济</span><span>芬兰</span><span>法国</span><span>加蓬</span><span>冈比亚</span><span>格鲁吉亚</span><span>德国</span><span>加纳</span><span>希腊</span><span>格林纳达</span><span>危地马拉</span><span>几内亚</span><span>几内亚比绍</span><span>圭亚那</span><span>海地</span><span>洪都拉斯</span><span>匈牙利</span><span>冰岛</span><span>印度</span><span>印度尼西亚</span><span>伊拉克</span><span>爱尔兰</span><span>以色列</span><span>意大利</span><span>牙买加</span><span>日本</span><span>约旦</span><span>哈萨克斯坦</span><span>肯尼亚</span><span>基里巴斯</span><span>科威特</span><span>吉尔吉斯斯坦</span><span>老挝</span><span>拉脱维亚</span><span>黎巴嫩</span><span>莱索托</span><span>利比里亚</span><span>列支敦士登</span><span>立陶宛</span><span>卢森堡</span><span>马达加斯加</span><span>马拉维</span><span>马来西亚</span><span>马尔代夫</span><span>马耳他</span><span>马绍尔群岛</span><span>毛里塔尼亚</span><span>毛里求斯</span><span>墨西哥</span><span>密克罗尼西亚</span><span>摩尔多瓦</span><span>摩纳哥</span><span>蒙古</span><span>黑山</span><span>摩洛哥</span><span>莫桑比克</span><span>纳米比亚</span><span>瑙鲁</span><span>尼泊尔</span><span>荷兰</span><span>新西兰</span><span>尼日尔</span><span>尼日利亚</span><span>北马其顿</span><span>挪威</span><span>阿曼</span><span>巴基斯坦</span><span>帕劳</span><span>巴勒斯坦</span><span>巴拿马</span><span>巴布亚新几内亚</span><span>巴拉圭</span><span>秘鲁</span><span>菲律宾</span><span>波兰</span><span>葡萄牙</span><span>卡塔尔</span><span>罗马尼亚</span><span>卢旺达</span><span>圣基茨和尼维斯</span><span>圣卢西亚</span><span>圣文森特和格林纳丁斯</span><span>萨摩亚</span><span>圣马力诺</span><span>圣多美和普林西比</span><span>沙特阿拉伯</span><span>塞内加尔</span><span>塞尔维亚</span><span>塞舌尔</span><span>塞拉利昂</span><span>新加坡</span><span>斯洛伐克</span><span>斯洛文尼亚</span><span>所罗门群岛</span><span>南非</span><span>韩国</span><span>西班牙</span><span>斯里兰卡</span><span>苏里南</span><span>瑞典</span><span>瑞士</span><span>中国台湾</span><span>塔吉克斯坦</span><span>坦桑尼亚</span><span>泰国</span><span>东帝汶</span><span>多哥</span><span>汤加</span><span>特立尼达和多巴哥</span><span>突尼斯</span><span>土耳其</span><span>土库曼斯坦</span><span>图瓦卢</span><span>乌干达</span><span>乌克兰（除克里米亚、顿涅茨克、赫尔松、卢甘斯克和扎波罗热地区外）</span><span>阿拉伯联合酋长国</span><span>英国</span><span>美利坚合众国</span><span>乌拉圭</span><span>乌兹别克斯坦</span><span>瓦努阿图</span><span>梵蒂冈城</span><span>越南</span><span>赞比亚</span><span>津巴布韦</span>
+          </div>
+
+          <h3>其他说明</h3>
+          <ul>
+            <li>此列表可能会定期更新。</li>
+            <li>对于未列出的地区，请联系我们的支持团队了解可用性。</li>
+            <li>某些服务可能在特定地区有额外限制。</li>
+          </ul>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-inner">
+          <div class="footer-brand">© 2026 fastcc. 保留所有权利。</div>
+          <div class="footer-links">
+            <a href="#user-agreement">服务条款</a>
+            <a href="#privacy-policy">隐私政策</a>
+            <a href="#usage-policy">使用政策</a>
+            <a href="#supported-regions">支持的国家和地区</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>
