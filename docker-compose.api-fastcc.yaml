@@ -1,0 +1,42 @@
+name: api-fastcc
+# bnewapi 站点：第三个 new-api 实例
+# 与 new-api(3001 qiyenewapi) / new-api-omnai(3000) 完全隔离的 project / data / logs / SECRET
+#
+# 启动：
+#   cd /root/new-api && docker compose -f docker-compose.api-fastcc.yaml --env-file .env.api-fastcc up -d
+
+services:
+  api-fastcc:
+    image: ${NEW_API_IMAGE:-ghcr.io/bobobi0208/new-api:latest}
+    container_name: api-fastcc
+    restart: always
+    command: --log-dir /app/logs
+    ports:
+      - "${PORT:-3011}:${PORT:-3011}"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./data-api-fastcc:/data
+      - ./logs-api-fastcc:/app/logs
+    environment:
+      PORT: ${PORT:-3011}
+      TZ: ${TZ:-Asia/Shanghai}
+      SQL_DSN: ${SQL_DSN:?set SQL_DSN in .env.api-fastcc}
+      REDIS_CONN_STRING: ${REDIS_CONN_STRING:?set REDIS_CONN_STRING in .env.api-fastcc}
+      ERROR_LOG_ENABLED: ${ERROR_LOG_ENABLED:-true}
+      BATCH_UPDATE_ENABLED: ${BATCH_UPDATE_ENABLED:-true}
+      MEMORY_CACHE_ENABLED: ${MEMORY_CACHE_ENABLED:-false}
+      SYNC_FREQUENCY: ${SYNC_FREQUENCY:-60}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      CRYPTO_SECRET: ${CRYPTO_SECRET:-}
+      GLOBAL_WEB_RATE_LIMIT: ${GLOBAL_WEB_RATE_LIMIT:-600}
+      GLOBAL_WEB_RATE_LIMIT_DURATION: ${GLOBAL_WEB_RATE_LIMIT_DURATION:-60}
+      LINUX_DO_TOKEN_ENDPOINT: ${LINUX_DO_TOKEN_ENDPOINT:-}
+      LINUX_DO_USER_ENDPOINT: ${LINUX_DO_USER_ENDPOINT:-}
+      DEBUG: ${DEBUG:-false}
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:${PORT:-3011}/api/status | grep -o '\"success\":\\s*true' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
