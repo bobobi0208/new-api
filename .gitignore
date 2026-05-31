@@ -35,6 +35,7 @@ data/
 .test
 token_estimator_test.go
 skills-lock.json
+.playwright-mcp
 
 # 本地产物 / 开发缓存
 .pnpm-store/
