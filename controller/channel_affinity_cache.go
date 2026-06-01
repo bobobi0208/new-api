@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/QuantumNous/new-api/service"
@@ -42,6 +43,34 @@ func ClearChannelAffinityCache(c *gin.Context) {
 	}
 
 	deleted, err := service.ClearChannelAffinityCacheByRuleName(ruleName)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+		"data": gin.H{
+			"deleted": deleted,
+		},
+	})
+}
+
+func RecoverChannelAffinity(c *gin.Context) {
+	id, err := strconv.Atoi(strings.TrimSpace(c.Param("id")))
+	if err != nil || id <= 0 {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"success": false,
+			"message": "invalid channel id",
+		})
+		return
+	}
+
+	deleted, err := service.ClearChannelAffinityFailuresByChannel(id)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"success": false,

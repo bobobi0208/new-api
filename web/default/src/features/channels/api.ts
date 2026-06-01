@@ -239,10 +239,24 @@ export async function copyChannel(
 }
 
 /**
+ * Recover channel affinity: clear this channel's failover trip counters so
+ * affinity traffic returns to it on the next request.
+ */
+export async function recoverChannelAffinity(
+  id: number
+): Promise<{ success: boolean; message?: string; data?: { deleted: number } }> {
+  const res = await api.post(
+    `/api/channel/${id}/affinity/recover`,
+    undefined,
+    channelActionConfig()
+  )
+  return res.data
+}
+
+/**
  * Fix channel abilities
  */
-export async function fixChannelAbilities(): Promise<{
-  success: boolean
+export async function fixChannelAbilities(): Promise<{  success: boolean
   message?: string
   data?: { success: number; fails: number }
 }> {

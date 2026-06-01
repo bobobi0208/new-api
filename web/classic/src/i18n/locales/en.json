@@ -2257,6 +2257,8 @@
     "浅色模式": "Light Mode",
     "测活": "Health Check",
     "测试": "Test",
+    "恢复亲和": "Recover affinity",
+    "已恢复渠道亲和（清除 ${count} 条计数）": "Recovered channel affinity (${count} entries cleared)",
     "测试中": "Testing",
     "测试中...": "Testing...",
     "测试单个渠道操作项目组": "Test a single channel operation project group",

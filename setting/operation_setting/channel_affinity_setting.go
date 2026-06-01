@@ -22,6 +22,12 @@ type ChannelAffinityRule struct {
 
 	SkipRetryOnFailure bool `json:"skip_retry_on_failure"`
 
+	// Failover overrides (0 = inherit global). FailoverDisabled turns the
+	// per-user failure circuit-breaker off for this rule.
+	FailoverThreshold     int  `json:"failover_threshold,omitempty"`
+	FailoverWindowSeconds int  `json:"failover_window_seconds,omitempty"`
+	FailoverDisabled      bool `json:"failover_disabled,omitempty"`
+
 	IncludeUsingGroup bool `json:"include_using_group"`
 	IncludeModelName  bool `json:"include_model_name"`
 	IncludeRuleName   bool `json:"include_rule_name"`
@@ -32,7 +38,15 @@ type ChannelAffinitySetting struct {
 	SwitchOnSuccess   bool                  `json:"switch_on_success"`
 	MaxEntries        int                   `json:"max_entries"`
 	DefaultTTLSeconds int                   `json:"default_ttl_seconds"`
-	Rules             []ChannelAffinityRule `json:"rules"`
+
+	// Per-user circuit breaker: when the same affinity key fails on a channel
+	// more than FailureThreshold times within FailureWindowSeconds, that channel
+	// stops being preferred so the next request falls back to another channel.
+	FailoverEnabled      bool `json:"failover_enabled"`
+	FailureThreshold     int  `json:"failure_threshold"`
+	FailureWindowSeconds int  `json:"failure_window_seconds"`
+
+	Rules []ChannelAffinityRule `json:"rules"`
 }
 
 var codexCliPassThroughHeaders = []string{
@@ -74,10 +88,13 @@ func buildPassHeaderTemplate(headers []string) map[string]interface{} {
 }
 
 var channelAffinitySetting = ChannelAffinitySetting{
-	Enabled:           true,
-	SwitchOnSuccess:   true,
-	MaxEntries:        100_000,
-	DefaultTTLSeconds: 3600,
+	Enabled:              true,
+	SwitchOnSuccess:      true,
+	MaxEntries:           100_000,
+	DefaultTTLSeconds:    3600,
+	FailoverEnabled:      true,
+	FailureThreshold:     3,
+	FailureWindowSeconds: 60,
 	Rules: []ChannelAffinityRule{
 		{
 			Name:       "codex cli trace",
@@ -118,4 +135,35 @@ func init() {
 
 func GetChannelAffinitySetting() *ChannelAffinitySetting {
 	return &channelAffinitySetting
+}
+
+// FailoverEffectiveForRule resolves the effective per-user failover config for a
+// rule, applying rule-level overrides on top of the global setting.
+// Returns enabled=false when failover is globally off, the rule opts out, or the
+// effective threshold/window is non-positive.
+func (s *ChannelAffinitySetting) FailoverEffectiveForRule(rule *ChannelAffinityRule) (enabled bool, threshold int, windowSeconds int) {
+	if s == nil || !s.FailoverEnabled {
+		return false, 0, 0
+	}
+	if rule != nil && rule.FailoverDisabled {
+		return false, 0, 0
+	}
+
+	threshold = s.FailureThreshold
+	windowSeconds = s.FailureWindowSeconds
+	if rule != nil {
+		if rule.FailoverThreshold > 0 {
+			threshold = rule.FailoverThreshold
+		}
+		if rule.FailoverWindowSeconds > 0 {
+			windowSeconds = rule.FailoverWindowSeconds
+		}
+	}
+	if windowSeconds <= 0 {
+		windowSeconds = s.DefaultTTLSeconds
+	}
+	if threshold <= 0 || windowSeconds <= 0 {
+		return false, 0, 0
+	}
+	return true, threshold, windowSeconds
 }

@@ -858,6 +858,28 @@ export const useChannelsData = () => {
     }
   };
 
+  // 恢复渠道亲和：清除该渠道的熔断计数，使亲和流量立即回切
+  const recoverChannelAffinity = async (record) => {
+    try {
+      const res = await API.post(`/api/channel/${record.id}/affinity/recover`);
+      const { success, message, data } = res.data;
+      if (success) {
+        const deleted = data?.deleted ?? 0;
+        showSuccess(
+          t('已恢复渠道亲和（清除 ${count} 条计数）').replace(
+            '${count}',
+            deleted,
+          ),
+        );
+        await refresh();
+      } else {
+        showError(message);
+      }
+    } catch (error) {
+      showError(error.message);
+    }
+  };
+
   // Test channel - 单个模型测试，参考旧版实现
   const testChannel = async (
     record,
@@ -1236,6 +1258,7 @@ export const useChannelsData = () => {
     fixChannelsAbilities,
     checkOllamaVersion,
     testChannel,
+    recoverChannelAffinity,
     batchTestModels,
     handleCloseModal,
     getFormValues,

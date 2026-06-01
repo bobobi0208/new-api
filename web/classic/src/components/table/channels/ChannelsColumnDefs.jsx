@@ -312,6 +312,7 @@ export const getChannelsColumns = ({
   manageTag,
   submitTagEdit,
   testChannel,
+  recoverChannelAffinity,
   setCurrentTestChannel,
   setShowModelTestModal,
   setEditingChannel,
@@ -796,6 +797,14 @@ export const getChannelsColumns = ({
                   }}
                 />
               </SplitButtonGroup>
+
+              <Button
+                size='small'
+                type='tertiary'
+                onClick={() => recoverChannelAffinity(record)}
+              >
+                {t('恢复亲和')}
+              </Button>
 
               {record.status === 1 ? (
                 <Button

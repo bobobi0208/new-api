@@ -33,6 +33,7 @@ import {
   Key,
   Trash2,
   RefreshCw,
+  RotateCcw,
   Loader2,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -55,6 +56,7 @@ import { MODEL_FETCHABLE_TYPES } from '../constants'
 import {
   channelsQueryKeys,
   handleDeleteChannel,
+  handleRecoverChannelAffinity,
   handleTestChannel,
   handleToggleChannelStatus,
   isChannelEnabled,
@@ -76,6 +78,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [isTesting, setIsTesting] = useState(false)
   const [isTogglingStatus, setIsTogglingStatus] = useState(false)
+  const [isRecovering, setIsRecovering] = useState(false)
 
   const isEnabled = isChannelEnabled(channel)
   const isMultiKey = isMultiKeyChannel(channel)
@@ -106,7 +109,6 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
     setCurrentRow(channel)
     setOpen('balance-query')
   }
-
   const handleFetchModels = () => {
     setCurrentRow(channel)
     setOpen('fetch-models')
@@ -139,6 +141,16 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
     }
   }
 
+  const handleRecover = async (e?: React.MouseEvent<HTMLButtonElement>) => {
+    e?.stopPropagation()
+    setIsRecovering(true)
+    try {
+      await handleRecoverChannelAffinity(channel.id, queryClient)
+    } finally {
+      setIsRecovering(false)
+    }
+  }
+
   return (
     <div className='flex items-center justify-end gap-1'>
       <Tooltip>
@@ -160,6 +172,31 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           )}
         </TooltipTrigger>
         <TooltipContent>{t('Test Connection')}</TooltipContent>
+      </Tooltip>
+
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <Button
+              variant='ghost'
+              size='icon-sm'
+              onClick={handleRecover}
+              disabled={isRecovering}
+              aria-label={t('Recover affinity')}
+            />
+          }
+        >
+          {isRecovering ? (
+            <Loader2 className='size-4 animate-spin' />
+          ) : (
+            <RotateCcw className='size-4' />
+          )}
+        </TooltipTrigger>
+        <TooltipContent>
+          {t(
+            "Clear this channel's failover trips and route affinity traffic back to it"
+          )}
+        </TooltipContent>
       </Tooltip>
 
       <Tooltip>

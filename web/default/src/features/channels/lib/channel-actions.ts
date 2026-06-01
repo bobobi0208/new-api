@@ -23,6 +23,7 @@ import { formatCurrencyFromUSD } from '@/lib/currency'
 import {
   copyChannel,
   deleteChannel,
+  recoverChannelAffinity,
   testChannel,
   updateChannel,
   batchDeleteChannels,
@@ -260,10 +261,38 @@ export async function handleTestChannel(
 }
 
 /**
+ * Recover channel affinity: clear this channel's failover trips so affinity
+ * traffic returns to it on the next request.
+ */
+export async function handleRecoverChannelAffinity(
+  id: number,
+  queryClient?: QueryClient
+): Promise<void> {
+  try {
+    const response = await recoverChannelAffinity(id)
+    if (response.success) {
+      toast.success(
+        i18next.t('Recovered channel affinity ({{count}} entries cleared)', {
+          count: response.data?.deleted ?? 0,
+        })
+      )
+      queryClient?.invalidateQueries({ queryKey: channelsQueryKeys.lists() })
+    } else {
+      toast.error(response.message || i18next.t(ERROR_MESSAGES.UPDATE_FAILED))
+    }
+  } catch (_error: unknown) {
+    const err = _error as { response?: { data?: { message?: string } } }
+    toast.error(
+      err?.response?.data?.message ||
+        i18next.t(ERROR_MESSAGES.UPDATE_FAILED)
+    )
+  }
+}
+
+/**
  * Copy a channel
  */
-export async function handleCopyChannel(
-  id: number,
+export async function handleCopyChannel(  id: number,
   params: CopyChannelParams,
   queryClient?: QueryClient,
   onSuccess?: (newId: number) => void

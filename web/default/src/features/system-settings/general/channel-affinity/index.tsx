@@ -106,6 +106,15 @@ export function ChannelAffinitySection(props: Props) {
   const [defaultTtl, setDefaultTtl] = useState(
     props.defaultValues['channel_affinity_setting.default_ttl_seconds']
   )
+  const [failoverEnabled, setFailoverEnabled] = useState(
+    props.defaultValues['channel_affinity_setting.failover_enabled']
+  )
+  const [failureThreshold, setFailureThreshold] = useState(
+    props.defaultValues['channel_affinity_setting.failure_threshold']
+  )
+  const [failureWindow, setFailureWindow] = useState(
+    props.defaultValues['channel_affinity_setting.failure_window_seconds']
+  )
   const [rules, setRules] = useState<AffinityRule[]>(() =>
     parseRules(props.defaultValues['channel_affinity_setting.rules'])
   )
@@ -139,6 +148,15 @@ export function ChannelAffinitySection(props: Props) {
     setMaxEntries(props.defaultValues['channel_affinity_setting.max_entries'])
     setDefaultTtl(
       props.defaultValues['channel_affinity_setting.default_ttl_seconds']
+    )
+    setFailoverEnabled(
+      props.defaultValues['channel_affinity_setting.failover_enabled']
+    )
+    setFailureThreshold(
+      props.defaultValues['channel_affinity_setting.failure_threshold']
+    )
+    setFailureWindow(
+      props.defaultValues['channel_affinity_setting.failure_window_seconds']
     )
     const parsed = parseRules(
       props.defaultValues['channel_affinity_setting.rules']
@@ -246,6 +264,30 @@ export function ChannelAffinitySection(props: Props) {
         updates.push({
           key: 'channel_affinity_setting.default_ttl_seconds',
           value: String(defaultTtl),
+        })
+      if (
+        failoverEnabled !==
+        props.defaultValues['channel_affinity_setting.failover_enabled']
+      )
+        updates.push({
+          key: 'channel_affinity_setting.failover_enabled',
+          value: String(failoverEnabled),
+        })
+      if (
+        failureThreshold !==
+        props.defaultValues['channel_affinity_setting.failure_threshold']
+      )
+        updates.push({
+          key: 'channel_affinity_setting.failure_threshold',
+          value: String(failureThreshold),
+        })
+      if (
+        failureWindow !==
+        props.defaultValues['channel_affinity_setting.failure_window_seconds']
+      )
+        updates.push({
+          key: 'channel_affinity_setting.failure_window_seconds',
+          value: String(failureWindow),
         })
 
       const origRules = props.defaultValues['channel_affinity_setting.rules']
@@ -397,6 +439,38 @@ export function ChannelAffinitySection(props: Props) {
             'If the affinity channel fails and retry succeeds on another channel, update affinity to the successful channel.'
           )}
         />
+
+        <Separator />
+
+        <SettingsSwitchField
+          checked={failoverEnabled}
+          onCheckedChange={setFailoverEnabled}
+          label={t('Enable failover on repeated failures')}
+          description={t(
+            'When the same user keeps failing on the affinity channel beyond the threshold within the window, stop preferring that channel so the next request switches to another channel in the same group.'
+          )}
+        />
+
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
+          <div className='grid gap-1.5'>
+            <Label>{t('Failure threshold')}</Label>
+            <Input
+              type='number'
+              min={0}
+              value={failureThreshold}
+              onChange={(e) => setFailureThreshold(Number(e.target.value))}
+            />
+          </div>
+          <div className='grid gap-1.5'>
+            <Label>{t('Failure window (seconds)')}</Label>
+            <Input
+              type='number'
+              min={0}
+              value={failureWindow}
+              onChange={(e) => setFailureWindow(Number(e.target.value))}
+            />
+          </div>
+        </div>
 
         <Separator />
 

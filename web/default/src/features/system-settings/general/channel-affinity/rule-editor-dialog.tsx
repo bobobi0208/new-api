@@ -77,6 +77,9 @@ interface RuleFormValues {
   value_regex: string
   ttl_seconds: number
   skip_retry_on_failure: boolean
+  failover_threshold: number
+  failover_window_seconds: number
+  failover_disabled: boolean
   include_using_group: boolean
   include_model_name: boolean
   include_rule_name: boolean
@@ -121,6 +124,9 @@ export function RuleEditorDialog(props: Props) {
       value_regex: '',
       ttl_seconds: 0,
       skip_retry_on_failure: false,
+      failover_threshold: 0,
+      failover_window_seconds: 0,
+      failover_disabled: false,
       include_using_group: true,
       include_model_name: false,
       include_rule_name: true,
@@ -137,6 +143,9 @@ export function RuleEditorDialog(props: Props) {
       value_regex: r.value_regex || '',
       ttl_seconds: r.ttl_seconds || 0,
       skip_retry_on_failure: !!r.skip_retry_on_failure,
+      failover_threshold: r.failover_threshold || 0,
+      failover_window_seconds: r.failover_window_seconds || 0,
+      failover_disabled: !!r.failover_disabled,
       include_using_group: r.include_using_group ?? true,
       include_model_name: !!r.include_model_name,
       include_rule_name: r.include_rule_name ?? true,
@@ -219,6 +228,9 @@ export function RuleEditorDialog(props: Props) {
       value_regex: values.value_regex.trim(),
       ttl_seconds: Number(values.ttl_seconds || 0),
       skip_retry_on_failure: values.skip_retry_on_failure,
+      failover_threshold: Number(values.failover_threshold || 0),
+      failover_window_seconds: Number(values.failover_window_seconds || 0),
+      failover_disabled: values.failover_disabled,
       include_using_group: values.include_using_group,
       include_model_name: values.include_model_name,
       include_rule_name: values.include_rule_name,
@@ -402,6 +414,32 @@ export function RuleEditorDialog(props: Props) {
                   />
                 </div>
               </div>
+
+              <div className='grid grid-cols-2 gap-3'>
+                <div className='grid gap-1.5'>
+                  <Label>{t('Failover threshold (0 = global)')}</Label>
+                  <Input
+                    type='number'
+                    min={0}
+                    {...form.register('failover_threshold')}
+                  />
+                </div>
+                <div className='grid gap-1.5'>
+                  <Label>{t('Failover window (seconds, 0 = global)')}</Label>
+                  <Input
+                    type='number'
+                    min={0}
+                    {...form.register('failover_window_seconds')}
+                  />
+                </div>
+              </div>
+
+              <SettingsSwitchField
+                checked={form.watch('failover_disabled')}
+                onCheckedChange={(v) => form.setValue('failover_disabled', v)}
+                label={t('Disable failover for this rule')}
+                className='border-b-0 py-0'
+              />
 
               <div className='grid gap-1.5'>
                 <Label>{t('Parameter Override Template (JSON)')}</Label>

@@ -25,9 +25,11 @@ const (
 	ginKeyChannelAffinityMeta       = "channel_affinity_meta"
 	ginKeyChannelAffinityLogInfo    = "channel_affinity_log_info"
 	ginKeyChannelAffinitySkipRetry  = "channel_affinity_skip_retry_on_failure"
+	ginKeyChannelAffinitySuppressed = "channel_affinity_suppressed"
 
 	channelAffinityCacheNamespace           = "new-api:channel_affinity:v1"
 	channelAffinityUsageCacheStatsNamespace = "new-api:channel_affinity_usage_cache_stats:v1"
+	channelAffinityFailureCacheNamespace    = "new-api:channel_affinity_failures:v1"
 )
 
 var (
@@ -37,11 +39,15 @@ var (
 	channelAffinityUsageCacheStatsOnce  sync.Once
 	channelAffinityUsageCacheStatsCache *cachex.HybridCache[ChannelAffinityUsageCacheCounters]
 
+	channelAffinityFailureCacheOnce sync.Once
+	channelAffinityFailureCache     *cachex.HybridCache[int]
+
 	channelAffinityRegexCache sync.Map // map[string]*regexp.Regexp
 )
 
 type channelAffinityMeta struct {
 	CacheKey       string
+	CacheKeySuffix string
 	TTLSeconds     int
 	RuleName       string
 	SkipRetry      bool
@@ -54,6 +60,10 @@ type channelAffinityMeta struct {
 	UsingGroup     string
 	ModelName      string
 	RequestPath    string
+
+	FailoverEnabled      bool
+	FailoverThreshold    int
+	FailoverWindowSecond int
 }
 
 type ChannelAffinityStatsContext struct {
@@ -106,6 +116,42 @@ func getChannelAffinityCache() *cachex.HybridCache[int] {
 		})
 	})
 	return channelAffinityCache
+}
+
+func getChannelAffinityFailureCache() *cachex.HybridCache[int] {
+	channelAffinityFailureCacheOnce.Do(func() {
+		setting := operation_setting.GetChannelAffinitySetting()
+		capacity := 100_000
+		defaultTTLSeconds := 60
+		if setting != nil {
+			if setting.MaxEntries > 0 {
+				capacity = setting.MaxEntries
+			}
+			if setting.FailureWindowSeconds > 0 {
+				defaultTTLSeconds = setting.FailureWindowSeconds
+			}
+		}
+
+		channelAffinityFailureCache = cachex.NewHybridCache[int](cachex.HybridCacheConfig[int]{
+			Namespace: cachex.Namespace(channelAffinityFailureCacheNamespace),
+			Redis:     common.RDB,
+			RedisEnabled: func() bool {
+				return common.RedisEnabled && common.RDB != nil
+			},
+			RedisCodec: cachex.IntCodec{},
+			Memory: func() *hot.HotCache[string, int] {
+				return hot.NewHotCache[string, int](hot.LRU, capacity).
+					WithTTL(time.Duration(defaultTTLSeconds) * time.Second).
+					WithJanitor().
+					Build()
+			},
+		})
+	})
+	return channelAffinityFailureCache
+}
+
+func channelAffinityFailureKey(cacheKeySuffix string, channelID int) string {
+	return cacheKeySuffix + "|ch:" + strconv.Itoa(channelID)
 }
 
 func GetChannelAffinityCacheStats() ChannelAffinityCacheStats {
@@ -243,6 +289,36 @@ func ClearChannelAffinityCacheByRuleName(ruleName string) (int, error) {
 		return 0, err
 	}
 	return deleted, nil
+}
+
+// ClearChannelAffinityFailuresByChannel clears all per-user failover failure
+// counters for a single channel, so a recovered channel immediately stops being
+// tripped and affinity traffic returns to it on the next request. Failure keys
+// are shaped "<suffix>|ch:<id>", so we list and suffix-match. This is a low
+// frequency admin/ops action, so the O(N) scan is acceptable.
+func ClearChannelAffinityFailuresByChannel(channelID int) (int, error) {
+	if channelID <= 0 {
+		return 0, fmt.Errorf("invalid channel id")
+	}
+	cache := getChannelAffinityFailureCache()
+	keys, err := cache.Keys()
+	if err != nil {
+		return 0, err
+	}
+	suffix := "|ch:" + strconv.Itoa(channelID)
+	matched := make([]string, 0)
+	for _, k := range keys {
+		if strings.HasSuffix(k, suffix) {
+			matched = append(matched, k)
+		}
+	}
+	if len(matched) == 0 {
+		return 0, nil
+	}
+	if _, err := cache.DeleteMany(matched); err != nil {
+		return 0, err
+	}
+	return len(matched), nil
 }
 
 func matchAnyRegexCached(patterns []string, s string) bool {
@@ -591,22 +667,28 @@ func GetPreferredChannelByAffinity(c *gin.Context, modelName string, usingGroup 
 		if ttlSeconds <= 0 {
 			ttlSeconds = setting.DefaultTTLSeconds
 		}
+		ruleCopy := rule
+		failoverEnabled, failoverThreshold, failoverWindow := setting.FailoverEffectiveForRule(&ruleCopy)
 		cacheKeySuffix := buildChannelAffinityCacheKeySuffix(rule, modelName, usingGroup, affinityValue)
 		cacheKeyFull := channelAffinityCacheNamespace + ":" + cacheKeySuffix
 		setChannelAffinityContext(c, channelAffinityMeta{
-			CacheKey:       cacheKeyFull,
-			TTLSeconds:     ttlSeconds,
-			RuleName:       rule.Name,
-			SkipRetry:      rule.SkipRetryOnFailure,
-			ParamTemplate:  cloneStringAnyMap(rule.ParamOverrideTemplate),
-			KeySourceType:  strings.TrimSpace(usedSource.Type),
-			KeySourceKey:   strings.TrimSpace(usedSource.Key),
-			KeySourcePath:  strings.TrimSpace(usedSource.Path),
-			KeyHint:        buildChannelAffinityKeyHint(affinityValue),
-			KeyFingerprint: affinityFingerprint(affinityValue),
-			UsingGroup:     usingGroup,
-			ModelName:      modelName,
-			RequestPath:    path,
+			CacheKey:             cacheKeyFull,
+			CacheKeySuffix:       cacheKeySuffix,
+			TTLSeconds:           ttlSeconds,
+			RuleName:             rule.Name,
+			SkipRetry:            rule.SkipRetryOnFailure,
+			ParamTemplate:        cloneStringAnyMap(rule.ParamOverrideTemplate),
+			KeySourceType:        strings.TrimSpace(usedSource.Type),
+			KeySourceKey:         strings.TrimSpace(usedSource.Key),
+			KeySourcePath:        strings.TrimSpace(usedSource.Path),
+			KeyHint:              buildChannelAffinityKeyHint(affinityValue),
+			KeyFingerprint:       affinityFingerprint(affinityValue),
+			UsingGroup:           usingGroup,
+			ModelName:            modelName,
+			RequestPath:          path,
+			FailoverEnabled:      failoverEnabled,
+			FailoverThreshold:    failoverThreshold,
+			FailoverWindowSecond: failoverWindow,
 		})
 
 		cache := getChannelAffinityCache()
@@ -616,6 +698,16 @@ func GetPreferredChannelByAffinity(c *gin.Context, modelName string, usingGroup 
 			return 0, false
 		}
 		if found {
+			// Per-user circuit breaker: if this channel has failed too many times
+			// within the window for this affinity key, stop preferring it so the
+			// caller falls back to another channel in the group. The affinity entry
+			// is kept (not deleted) and the request is marked suppressed so a
+			// successful fallback does not overwrite it — once the channel recovers
+			// (or the failure window expires) traffic returns to the original channel.
+			if failoverEnabled && channelAffinityChannelTripped(cacheKeySuffix, channelID, failoverThreshold) {
+				c.Set(ginKeyChannelAffinitySuppressed, true)
+				return 0, false
+			}
 			return channelID, true
 		}
 		return 0, false
@@ -682,6 +774,12 @@ func RecordChannelAffinity(c *gin.Context, channelID int) {
 	if channelID <= 0 {
 		return
 	}
+	// If this request was suppressed by the failover circuit breaker, it ran on a
+	// fallback channel — do not overwrite the original affinity, so traffic can
+	// return to the original channel once it recovers.
+	if c != nil && c.GetBool(ginKeyChannelAffinitySuppressed) {
+		return
+	}
 	setting := operation_setting.GetChannelAffinitySetting()
 	if setting == nil || !setting.Enabled {
 		return
@@ -705,6 +803,90 @@ func RecordChannelAffinity(c *gin.Context, channelID int) {
 	if err := cache.SetWithTTL(cacheKey, channelID, time.Duration(ttlSeconds)*time.Second); err != nil {
 		common.SysError(fmt.Sprintf("channel affinity cache set failed: key=%s, err=%v", cacheKey, err))
 	}
+}
+
+// channelAffinityChannelTripped reports whether the failure count for an affinity
+// key + channel has reached the threshold within the active window.
+func channelAffinityChannelTripped(cacheKeySuffix string, channelID int, threshold int) bool {
+	if cacheKeySuffix == "" || channelID <= 0 || threshold <= 0 {
+		return false
+	}
+	failKey := channelAffinityFailureKey(cacheKeySuffix, channelID)
+	count, found, err := getChannelAffinityFailureCache().Get(failKey)
+	if err != nil || !found {
+		return false
+	}
+	return count >= threshold
+}
+
+// RecordChannelAffinityFailure increments the per-user (affinity key) failure
+// counter for a channel when a channel-side failure occurs. User-side errors
+// (4xx, sensitive words, insufficient quota) are ignored so a bad request does
+// not evict a healthy channel.
+func RecordChannelAffinityFailure(c *gin.Context, channelID int, err *types.NewAPIError) {
+	if c == nil || channelID <= 0 || err == nil {
+		return
+	}
+	meta, ok := getChannelAffinityMeta(c)
+	if !ok {
+		return
+	}
+	if !meta.FailoverEnabled || meta.FailoverThreshold <= 0 || meta.CacheKeySuffix == "" {
+		return
+	}
+	windowSeconds := meta.FailoverWindowSecond
+	if windowSeconds <= 0 {
+		return
+	}
+	if !isChannelSideFailure(err) {
+		return
+	}
+
+	failKey := channelAffinityFailureKey(meta.CacheKeySuffix, channelID)
+	cache := getChannelAffinityFailureCache()
+	ttl := time.Duration(windowSeconds) * time.Second
+
+	lock := channelAffinityUsageCacheStatsLock(failKey)
+	lock.Lock()
+	defer lock.Unlock()
+
+	prev, found, getErr := cache.Get(failKey)
+	if getErr != nil {
+		return
+	}
+	next := 1
+	if found {
+		next = prev + 1
+	}
+	if setErr := cache.SetWithTTL(failKey, next, ttl); setErr != nil {
+		common.SysError(fmt.Sprintf("channel affinity failure cache set failed: key=%s, err=%v", failKey, setErr))
+	}
+}
+
+// isChannelSideFailure mirrors the retry classification in controller/relay.go:
+// only channel/upstream failures count toward the failover threshold.
+func isChannelSideFailure(err *types.NewAPIError) bool {
+	if err == nil {
+		return false
+	}
+	if types.IsSkipRetryError(err) {
+		return false
+	}
+	if operation_setting.IsAlwaysSkipRetryCode(err.GetErrorCode()) {
+		return false
+	}
+	if types.IsChannelError(err) {
+		return true
+	}
+	code := err.StatusCode
+	if code >= 200 && code < 300 {
+		return false
+	}
+	if code < 100 || code > 599 {
+		// network / connection level failures
+		return true
+	}
+	return operation_setting.ShouldRetryByStatusCode(code)
 }
 
 type ChannelAffinityUsageCacheStats struct {

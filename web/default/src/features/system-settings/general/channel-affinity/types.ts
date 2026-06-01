@@ -32,6 +32,9 @@ export interface AffinityRule {
   value_regex?: string
   ttl_seconds: number
   skip_retry_on_failure: boolean
+  failover_threshold?: number
+  failover_window_seconds?: number
+  failover_disabled?: boolean
   include_using_group: boolean
   include_model_name: boolean
   include_rule_name: boolean
@@ -52,5 +55,8 @@ export interface ChannelAffinitySettings {
   'channel_affinity_setting.switch_on_success': boolean
   'channel_affinity_setting.max_entries': number
   'channel_affinity_setting.default_ttl_seconds': number
+  'channel_affinity_setting.failover_enabled': boolean
+  'channel_affinity_setting.failure_threshold': number
+  'channel_affinity_setting.failure_window_seconds': number
   'channel_affinity_setting.rules': string
 }
