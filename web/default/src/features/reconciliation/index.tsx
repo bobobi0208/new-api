@@ -317,6 +317,9 @@ export function Reconciliation() {
                 <strong>{t('Channel ID')}:</strong> {detailQuery.data.data.channel_id}
               </div>
               <div>
+                <strong>{t('Channel Name')}:</strong> {detailQuery.data.data.channel_name ?? '-'}
+              </div>
+              <div>
                 <strong>{t('Upstream')}:</strong> {detailQuery.data.data.upstream_type}
               </div>
               <div>
@@ -386,6 +389,7 @@ function RecordsTable({
         <TableHeader>
           <TableRow>
             <TableHead>{t('Channel')}</TableHead>
+            <TableHead>{t('Channel Name')}</TableHead>
             <TableHead>{t('Upstream')}</TableHead>
             <TableHead>{t('Run Type')}</TableHead>
             <TableHead>{t('Status')}</TableHead>
@@ -399,14 +403,14 @@ function RecordsTable({
         <TableBody>
           {loading && (
             <TableRow>
-              <TableCell colSpan={9} className="text-center text-muted-foreground">
+              <TableCell colSpan={10} className="text-center text-muted-foreground">
                 {t('Loading...')}
               </TableCell>
             </TableRow>
           )}
           {!loading && records.length === 0 && (
             <TableRow>
-              <TableCell colSpan={9} className="text-center text-muted-foreground">
+              <TableCell colSpan={10} className="text-center text-muted-foreground">
                 {emptyHint ?? t('No records yet')}
               </TableCell>
             </TableRow>
@@ -414,6 +418,7 @@ function RecordsTable({
           {records.map((r) => (
             <TableRow key={r.id}>
               <TableCell>{r.channel_id}</TableCell>
+              <TableCell className="text-xs">{r.channel_name ?? '-'}</TableCell>
               <TableCell>
                 <Badge variant="outline">{r.upstream_type}</Badge>
               </TableCell>

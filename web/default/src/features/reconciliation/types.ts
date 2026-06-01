@@ -41,6 +41,7 @@ export type ReconciliationUpstreamType =
 export type ReconciliationRecord = {
   id: number
   channel_id: number
+  channel_name?: string
   upstream_type: ReconciliationUpstreamType | string
   run_type: ReconciliationRunType | string
   run_at: number

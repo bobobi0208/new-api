@@ -204,6 +204,7 @@ function ReconciliationPage() {
 
   const recordColumns = [
     { title: '渠道', dataIndex: 'channel_id', key: 'channel_id' },
+    { title: '渠道名', dataIndex: 'channel_name', key: 'channel_name', render: (v) => v || '-' },
     {
       title: '上游',
       dataIndex: 'upstream_type',
@@ -447,6 +448,7 @@ function ReconciliationPage() {
         {detail && (
           <Space vertical style={{ width: '100%' }} align='start'>
             <Text><strong>渠道 ID：</strong>{detail.channel_id}</Text>
+            <Text><strong>渠道名：</strong>{detail.channel_name || '-'}</Text>
             <Text><strong>上游：</strong>{detail.upstream_type}</Text>
             <Text><strong>运行类型：</strong>{detail.run_type}</Text>
             <Text><strong>状态：</strong>{statusTag(detail.status)}</Text>

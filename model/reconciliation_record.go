@@ -24,6 +24,7 @@ const (
 type ReconciliationRecord struct {
 	Id                int       `json:"id"`
 	ChannelId         int       `json:"channel_id" gorm:"index;not null"`
+	ChannelName       string    `json:"channel_name" gorm:"-"`
 	UpstreamType      string    `json:"upstream_type" gorm:"type:varchar(32);not null"`
 	RunType           string    `json:"run_type" gorm:"type:varchar(32);not null;index"`
 	RunAt             int64     `json:"run_at" gorm:"bigint;index"`

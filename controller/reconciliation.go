@@ -40,6 +40,7 @@ func GetReconciliationRecords(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	attachChannelNames(records)
 	pageInfo.SetTotal(int(total))
 	pageInfo.SetItems(records)
 	common.ApiSuccess(c, pageInfo)
@@ -58,6 +59,7 @@ func GetReconciliationRecord(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	attachChannelName(rec)
 	common.ApiSuccess(c, rec)
 }
 
@@ -69,6 +71,7 @@ func GetReconciliationAlerts(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	attachChannelNames(alerts)
 	common.ApiSuccess(c, alerts)
 }
 
@@ -80,6 +83,7 @@ func GetReconciliationLatestPerChannel(c *gin.Context) {
 		common.ApiError(c, err)
 		return
 	}
+	attachChannelNames(latest)
 	common.ApiSuccess(c, latest)
 }
 
@@ -228,4 +232,49 @@ func atoiSafe(s string) int {
 		return 0
 	}
 	return v
+}
+
+func attachChannelNames(records []model.ReconciliationRecord) {
+	if len(records) == 0 {
+		return
+	}
+	seen := make(map[int]struct{}, len(records))
+	ids := make([]int, 0, len(records))
+	for _, r := range records {
+		if r.ChannelId == 0 {
+			continue
+		}
+		if _, ok := seen[r.ChannelId]; ok {
+			continue
+		}
+		seen[r.ChannelId] = struct{}{}
+		ids = append(ids, r.ChannelId)
+	}
+	if len(ids) == 0 {
+		return
+	}
+	channels, err := model.GetChannelsByIds(ids)
+	if err != nil {
+		return
+	}
+	names := make(map[int]string, len(channels))
+	for _, ch := range channels {
+		if ch != nil {
+			names[ch.Id] = ch.Name
+		}
+	}
+	for i := range records {
+		records[i].ChannelName = names[records[i].ChannelId]
+	}
+}
+
+func attachChannelName(record *model.ReconciliationRecord) {
+	if record == nil || record.ChannelId == 0 {
+		return
+	}
+	ch, err := model.GetChannelById(record.ChannelId, false)
+	if err != nil || ch == nil {
+		return
+	}
+	record.ChannelName = ch.Name
 }
