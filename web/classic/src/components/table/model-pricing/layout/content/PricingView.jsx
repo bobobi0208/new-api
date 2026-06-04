@@ -19,11 +19,11 @@ For commercial licensing, please contact support@quantumnous.com
 
 import React from 'react';
 import PricingTable from '../../view/table/PricingTable';
-import PricingCardView from '../../view/card/PricingCardView';
+import PricingComparisonView from '../../view/comparison/PricingComparisonView';
 
 const PricingView = ({ viewMode = 'table', ...props }) => {
   return viewMode === 'card' ? (
-    <PricingCardView {...props} />
+    <PricingComparisonView {...props} />
   ) : (
     <PricingTable {...props} />
   );

@@ -128,6 +128,8 @@ export function Pricing() {
           usdExchangeRate={usdExchangeRate}
           tokenUnit={tokenUnit}
           showRechargePrice={showRechargePrice}
+          groupRatio={groupRatio}
+          usableGroup={usableGroup}
         />
       )
     }

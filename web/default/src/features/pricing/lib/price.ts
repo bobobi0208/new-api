@@ -262,6 +262,96 @@ export function formatFixedPrice(
 }
 
 /**
+ * Compute token-based price in USD, already divided by the token unit, for a
+ * given group ratio. Returns NaN for per-request models or when the price type
+ * is unavailable on the model.
+ *
+ * Mirrors {@link formatGroupPrice}'s math but returns the raw number so callers
+ * (e.g. dual-currency display) can render USD and CNY side by side.
+ */
+export function computeTokenPriceUSD(
+  model: PricingModel,
+  type: PriceType,
+  ratio: number,
+  tokenUnit: TokenUnit,
+  showWithRecharge: boolean,
+  priceRate: number,
+  usdExchangeRate: number
+): number {
+  if (model.quota_type === QUOTA_TYPE_VALUES.REQUEST) {
+    return Number.NaN
+  }
+
+  let priceInUSD = calculateTokenPrice(model, type, ratio)
+  priceInUSD = applyRechargeRate(
+    priceInUSD,
+    showWithRecharge,
+    priceRate,
+    usdExchangeRate
+  )
+  return priceInUSD / TOKEN_UNIT_DIVISORS[tokenUnit]
+}
+
+/**
+ * Compute fixed per-request price in USD for a given group ratio. Returns NaN
+ * for token-based models.
+ */
+export function computeRequestPriceUSD(
+  model: PricingModel,
+  ratio: number,
+  showWithRecharge: boolean,
+  priceRate: number,
+  usdExchangeRate: number
+): number {
+  if (model.quota_type !== QUOTA_TYPE_VALUES.REQUEST) {
+    return Number.NaN
+  }
+
+  let priceInUSD = (model.model_price || 0) * ratio
+  priceInUSD = applyRechargeRate(
+    priceInUSD,
+    showWithRecharge,
+    priceRate,
+    usdExchangeRate
+  )
+  return priceInUSD
+}
+
+function formatUSDLabel(value: number): string {
+  if (!Number.isFinite(value)) return '-'
+  if (value === 0) return '$0'
+  const abs = Math.abs(value)
+  if (abs < 0.0001) return '$' + value.toFixed(6)
+  return '$' + value.toFixed(4)
+}
+
+function formatCNYLabel(value: number): string {
+  if (!Number.isFinite(value)) return '-'
+  if (value === 0) return '¥0'
+  const abs = Math.abs(value)
+  if (abs < 0.01) return '¥' + value.toFixed(4)
+  return '¥' + value.toFixed(2)
+}
+
+/**
+ * Format a USD price value into paired USD and CNY display strings. CNY is
+ * computed via the real exchange rate (USD × usdExchangeRate). When the input
+ * is NaN both fields fall back to "-".
+ */
+export function formatDualCurrency(
+  usdValue: number,
+  usdExchangeRate: number
+): { usd: string; cny: string } {
+  if (!Number.isFinite(usdValue)) {
+    return { usd: '-', cny: '-' }
+  }
+  return {
+    usd: formatUSDLabel(usdValue),
+    cny: formatCNYLabel(usdValue * usdExchangeRate),
+  }
+}
+
+/**
  * Format fixed price for pay-per-request models (minimum price from all groups)
  */
 export function formatRequestPrice(
