@@ -376,6 +376,13 @@ func SetApiRouter(router *gin.Engine) {
 			groupRoute.GET("/", controller.GetGroups)
 		}
 
+		availabilityRoute := apiRouter.Group("/availability")
+		availabilityRoute.Use(middleware.AdminAuth())
+		{
+			availabilityRoute.GET("/overview", controller.GetAvailabilityOverview)
+			availabilityRoute.GET("/group", controller.GetAvailabilityGroup)
+		}
+
 		prefillGroupRoute := apiRouter.Group("/prefill_group")
 		prefillGroupRoute.Use(middleware.AdminAuth())
 		{

@@ -4215,6 +4215,26 @@
     "并确认自行承担部署": "confirm that I bear legal responsibility arising from deployment",
     "运营和收费行为产生的法律责任": "operation and charging behavior",
     "，": ", ",
-    "、": ", "
+    "、": ", ",
+    "可用性监控": "Giám sát khả dụng",
+    "按分组维度查看成功率、渠道在线率与延迟趋势": "Tỷ lệ thành công, tỷ lệ kênh online và độ trễ theo nhóm",
+    "最近 30 分钟": "30 phút qua",
+    "最近 24 小时": "24 giờ qua",
+    "最近 7 天": "7 ngày qua",
+    "暂无可监控的分组": "Không có nhóm để giám sát",
+    "成功率": "Tỷ lệ thành công",
+    "在线率": "Tỷ lệ online",
+    "请求数": "Số yêu cầu",
+    "P95 延迟": "Độ trễ P95",
+    "平均延迟": "Độ trễ trung bình",
+    "趋势": "Xu hướng",
+    "该时间窗内暂无数据": "Không có dữ liệu trong khoảng này",
+    "错误数": "Lỗi",
+    "测试延迟": "Độ trễ kiểm tra",
+    "该分组下暂无渠道": "Nhóm này chưa có kênh",
+    "Unknown": "Không xác định",
+    "Enabled": "Đã bật",
+    "Manually Disabled": "Tắt thủ công",
+    "Auto Disabled": "Tự động tắt"
   }
 }
