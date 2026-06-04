@@ -33,6 +33,7 @@ import { Nav, Divider, Button } from '@douyinfe/semi-ui';
 const routerMap = {
   home: '/',
   channel: '/console/channel',
+  availability: '/console/availability',
   token: '/console/token',
   redemption: '/console/redemption',
   topup: '/console/topup',
@@ -151,6 +152,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('渠道管理'),
         itemKey: 'channel',
         to: '/channel',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('可用性监控'),
+        itemKey: 'availability',
+        to: '/availability',
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {

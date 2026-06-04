@@ -22,6 +22,7 @@ import {
   CreditCard,
   FileText,
   FlaskConical,
+  Gauge,
   Key,
   LayoutDashboard,
   ListTodo,
@@ -120,6 +121,11 @@ export function useSidebarData(): SidebarData {
             title: t('Channels'),
             url: '/channels',
             icon: Radio,
+          },
+          {
+            title: t('Availability Monitor'),
+            url: '/availability',
+            icon: Gauge,
           },
           {
             title: t('Models'),

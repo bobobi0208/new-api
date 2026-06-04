@@ -3825,6 +3825,27 @@
     "并确认自行承担部署": "confirm that I bear legal responsibility arising from deployment",
     "运营和收费行为产生的法律责任": "operation and charging behavior",
     "，": ", ",
-    "、": ", "
+    "、": ", ",
+    "可用性监控": "Availability Monitor",
+    "按分组维度查看成功率、渠道在线率与延迟趋势": "Success rate, online rate and latency trends by group",
+    "最近 30 分钟": "Last 30 minutes",
+    "最近 24 小时": "Last 24 hours",
+    "最近 7 天": "Last 7 days",
+    "暂无可监控的分组": "No groups available",
+    "成功率": "Success Rate",
+    "在线率": "Online Rate",
+    "请求数": "Request Count",
+    "P95 延迟": "P95 Latency",
+    "平均延迟": "Avg Latency",
+    "趋势": "Trend",
+    "该时间窗内暂无数据": "No data in this window",
+    "渠道状态": "Channel Status",
+    "错误数": "Errors",
+    "测试延迟": "Test Latency",
+    "该分组下暂无渠道": "No channels in this group",
+    "Unknown": "Unknown",
+    "Enabled": "Enabled",
+    "Manually Disabled": "Manually Disabled",
+    "Auto Disabled": "Auto Disabled"
   }
 }

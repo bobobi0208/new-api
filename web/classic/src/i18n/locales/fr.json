@@ -3679,6 +3679,27 @@
     "并确认自行承担部署": "confirm that I bear legal responsibility arising from deployment",
     "运营和收费行为产生的法律责任": "operation and charging behavior",
     "，": ", ",
-    "、": ", "
+    "、": ", ",
+    "可用性监控": "Moniteur de disponibilité",
+    "按分组维度查看成功率、渠道在线率与延迟趋势": "Taux de réussite, taux en ligne et latence par groupe",
+    "最近 30 分钟": "30 dernières minutes",
+    "最近 24 小时": "Dernières 24 heures",
+    "最近 7 天": "7 derniers jours",
+    "暂无可监控的分组": "Aucun groupe disponible",
+    "成功率": "Taux de réussite",
+    "在线率": "Taux en ligne",
+    "请求数": "Nombre de requêtes",
+    "P95 延迟": "Latence P95",
+    "平均延迟": "Latence moyenne",
+    "趋势": "Tendance",
+    "该时间窗内暂无数据": "Aucune donnée dans cette fenêtre",
+    "渠道状态": "État du canal",
+    "错误数": "Erreurs",
+    "测试延迟": "Latence de test",
+    "该分组下暂无渠道": "Aucun canal dans ce groupe",
+    "Unknown": "Inconnu",
+    "Enabled": "Activé",
+    "Manually Disabled": "Désactivé manuellement",
+    "Auto Disabled": "Désactivé automatiquement"
   }
 }
