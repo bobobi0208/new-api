@@ -365,6 +365,22 @@ func GetAllChannels(startIdx int, num int, selectAll bool, idSort bool, sortOpti
 	return channels, err
 }
 
+// ChannelLite is a minimal channel projection (id/name/status) for listings
+// that must not pull the secret key column or full channel rows.
+type ChannelLite struct {
+	Id     int    `json:"id"`
+	Name   string `json:"name"`
+	Status int    `json:"status"`
+}
+
+// GetChannelLiteList returns id/name/status for all channels. Cheap projection,
+// no secret material — used by the admin channel load overview.
+func GetChannelLiteList() ([]ChannelLite, error) {
+	var out []ChannelLite
+	err := DB.Model(&Channel{}).Select("id, name, status").Scan(&out).Error
+	return out, err
+}
+
 func GetChannelsByTag(tag string, idSort bool, selectAll bool, sortOptions ...ChannelSortOptions) ([]*Channel, error) {
 	var channels []*Channel
 	order := resolveChannelSortOptions(idSort, sortOptions)

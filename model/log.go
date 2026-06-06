@@ -510,6 +510,51 @@ func SumUsedQuota(logType int, startTimestamp int64, endTimestamp int64, modelNa
 	return stat, nil
 }
 
+// ChannelReqStat holds per-channel request/error counts over a time window.
+type ChannelReqStat struct {
+	Requests int64 // consume logs (LogTypeConsume) in window
+	Errors   int64 // error logs (LogTypeError) in window
+}
+
+// GetChannelRequestStats returns, per channel, the number of consume and error
+// logs since sinceTs (unix seconds). Used by the admin channel load overview to
+// derive recent RPM and error rate. A single GROUP BY query, cross-DB safe.
+//
+// Error counts are only populated when error logging is enabled
+// (constant.ErrorLogEnabled); otherwise Errors is always 0.
+func GetChannelRequestStats(sinceTs int64) (map[int]ChannelReqStat, error) {
+	type row struct {
+		ChannelId int   `gorm:"column:channel_id"`
+		Type      int   `gorm:"column:type"`
+		Cnt       int64 `gorm:"column:cnt"`
+	}
+	var rows []row
+	err := LOG_DB.Table("logs").
+		Select("channel_id, type, count(*) as cnt").
+		Where("created_at >= ?", sinceTs).
+		Where("type IN ?", []int{LogTypeConsume, LogTypeError}).
+		Group("channel_id, type").
+		Scan(&rows).Error
+	if err != nil {
+		return nil, err
+	}
+	out := make(map[int]ChannelReqStat, len(rows))
+	for _, r := range rows {
+		if r.ChannelId <= 0 {
+			continue
+		}
+		stat := out[r.ChannelId]
+		switch r.Type {
+		case LogTypeConsume:
+			stat.Requests += r.Cnt
+		case LogTypeError:
+			stat.Errors += r.Cnt
+		}
+		out[r.ChannelId] = stat
+	}
+	return out, nil
+}
+
 func SumUsedToken(logType int, startTimestamp int64, endTimestamp int64, modelName string, username string, tokenName string) (token int) {
 	tx := LOG_DB.Table("logs").Select("ifnull(sum(prompt_tokens),0) + ifnull(sum(completion_tokens),0)")
 	if username != "" {

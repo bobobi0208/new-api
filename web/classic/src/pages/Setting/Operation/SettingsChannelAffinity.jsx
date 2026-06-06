@@ -64,6 +64,9 @@ const KEY_ENABLED = 'channel_affinity_setting.enabled';
 const KEY_SWITCH_ON_SUCCESS = 'channel_affinity_setting.switch_on_success';
 const KEY_MAX_ENTRIES = 'channel_affinity_setting.max_entries';
 const KEY_DEFAULT_TTL = 'channel_affinity_setting.default_ttl_seconds';
+const KEY_FAILOVER_ENABLED = 'channel_affinity_setting.failover_enabled';
+const KEY_FAILURE_THRESHOLD = 'channel_affinity_setting.failure_threshold';
+const KEY_FAILURE_WINDOW = 'channel_affinity_setting.failure_window_seconds';
 const KEY_RULES = 'channel_affinity_setting.rules';
 
 const KEY_SOURCE_TYPES = [
@@ -243,6 +246,9 @@ export default function SettingsChannelAffinity(props) {
     [KEY_SWITCH_ON_SUCCESS]: true,
     [KEY_MAX_ENTRIES]: 100000,
     [KEY_DEFAULT_TTL]: 3600,
+    [KEY_FAILOVER_ENABLED]: true,
+    [KEY_FAILURE_THRESHOLD]: 3,
+    [KEY_FAILURE_WINDOW]: 60,
     [KEY_RULES]: '[]',
   });
   const refForm = useRef();
@@ -860,6 +866,9 @@ export default function SettingsChannelAffinity(props) {
           KEY_SWITCH_ON_SUCCESS,
           KEY_MAX_ENTRIES,
           KEY_DEFAULT_TTL,
+          KEY_FAILOVER_ENABLED,
+          KEY_FAILURE_THRESHOLD,
+          KEY_FAILURE_WINDOW,
           KEY_RULES,
         ].includes(key)
       )
@@ -868,9 +877,15 @@ export default function SettingsChannelAffinity(props) {
         currentInputs[key] = toBoolean(props.options[key]);
       else if (key === KEY_SWITCH_ON_SUCCESS)
         currentInputs[key] = toBoolean(props.options[key]);
+      else if (key === KEY_FAILOVER_ENABLED)
+        currentInputs[key] = toBoolean(props.options[key]);
       else if (key === KEY_MAX_ENTRIES)
         currentInputs[key] = Number(props.options[key] || 0) || 0;
       else if (key === KEY_DEFAULT_TTL)
+        currentInputs[key] = Number(props.options[key] || 0) || 0;
+      else if (key === KEY_FAILURE_THRESHOLD)
+        currentInputs[key] = Number(props.options[key] || 0) || 0;
+      else if (key === KEY_FAILURE_WINDOW)
         currentInputs[key] = Number(props.options[key] || 0) || 0;
       else if (key === KEY_RULES) {
         try {
@@ -1002,6 +1017,63 @@ export default function SettingsChannelAffinity(props) {
                     '如果亲和到的渠道失败，重试到其他渠道成功后，将亲和更新到成功的渠道。',
                   )}
                 </Text>
+              </Col>
+            </Row>
+
+            <Row gutter={16} style={{ marginTop: 12 }}>
+              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+                <Form.Switch
+                  field={KEY_FAILOVER_ENABLED}
+                  label={t('失败累计后自动切换渠道')}
+                  checkedText='|'
+                  uncheckedText='O'
+                  onChange={(value) =>
+                    setInputs({ ...inputs, [KEY_FAILOVER_ENABLED]: value })
+                  }
+                />
+                <Text type='tertiary' size='small'>
+                  {t(
+                    '当同一用户在亲和渠道上的失败次数在统计窗口内超过阈值时，停止优先使用该渠道，后续请求切换到同组的其他渠道。',
+                  )}
+                </Text>
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+                <Form.InputNumber
+                  field={KEY_FAILURE_THRESHOLD}
+                  label={t('失败阈值')}
+                  min={0}
+                  placeholder='例如 3…'
+                  extraText={
+                    <Text type='tertiary' size='small'>
+                      {t('窗口内失败达到该次数后熔断。0 表示使用后端默认值：3。')}
+                    </Text>
+                  }
+                  onChange={(value) =>
+                    setInputs({
+                      ...inputs,
+                      [KEY_FAILURE_THRESHOLD]: Number(value || 0),
+                    })
+                  }
+                />
+              </Col>
+              <Col xs={24} sm={12} md={8} lg={8} xl={8}>
+                <Form.InputNumber
+                  field={KEY_FAILURE_WINDOW}
+                  label={t('失败统计窗口（秒）')}
+                  min={0}
+                  placeholder='例如 60…'
+                  extraText={
+                    <Text type='tertiary' size='small'>
+                      {t('统计失败次数的滑动窗口。0 表示使用后端默认值：60 秒。')}
+                    </Text>
+                  }
+                  onChange={(value) =>
+                    setInputs({
+                      ...inputs,
+                      [KEY_FAILURE_WINDOW]: Number(value || 0),
+                    })
+                  }
+                />
               </Col>
             </Row>
 

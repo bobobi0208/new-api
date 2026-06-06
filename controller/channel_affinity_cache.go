@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/gin-gonic/gin"
 )
@@ -78,6 +80,8 @@ func RecoverChannelAffinity(c *gin.Context) {
 		})
 		return
 	}
+
+	logger.LogInfo(c, fmt.Sprintf("channel affinity failures cleared: channel_id=%d cleared=%d", id, deleted))
 
 	c.JSON(http.StatusOK, gin.H{
 		"success": true,

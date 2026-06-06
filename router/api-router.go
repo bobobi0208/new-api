@@ -295,6 +295,7 @@ func SetApiRouter(router *gin.Engine) {
 			channelRoute.GET("/tag/models", controller.GetTagModels)
 			channelRoute.POST("/copy/:id", controller.CopyChannel)
 			channelRoute.POST("/:id/affinity/recover", controller.RecoverChannelAffinity)
+			channelRoute.GET("/load_overview", controller.GetChannelLoadOverview)
 			channelRoute.POST("/multi_key/manage", controller.ManageMultiKeys)
 			channelRoute.POST("/upstream_updates/apply", controller.ApplyChannelUpstreamModelUpdates)
 			channelRoute.POST("/upstream_updates/apply_all", controller.ApplyAllChannelUpstreamModelUpdates)

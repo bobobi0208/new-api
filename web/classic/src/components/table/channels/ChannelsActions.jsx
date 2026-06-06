@@ -17,7 +17,7 @@ along with this program. If not, see <https://www.gnu.org/licenses/>.
 For commercial licensing, please contact support@quantumnous.com
 */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Button,
   Dropdown,
@@ -27,6 +27,7 @@ import {
   Select,
 } from '@douyinfe/semi-ui';
 import CompactModeToggle from '../../common/ui/CompactModeToggle';
+import ChannelLoadOverviewModal from './modals/ChannelLoadOverviewModal';
 
 const ChannelsActions = ({
   enableBatchDelete,
@@ -58,6 +59,8 @@ const ChannelsActions = ({
   setActivePage,
   t,
 }) => {
+  const [showLoadOverview, setShowLoadOverview] = useState(false);
+
   return (
     <div className='flex flex-col gap-2'>
       {/* 第一行：批量操作按钮 + 设置开关 */}
@@ -195,6 +198,16 @@ const ChannelsActions = ({
                 <Dropdown.Item>
                   <Button
                     size='small'
+                    type='tertiary'
+                    className='w-full'
+                    onClick={() => setShowLoadOverview(true)}
+                  >
+                    {t('渠道负载总览')}
+                  </Button>
+                </Dropdown.Item>
+                <Dropdown.Item>
+                  <Button
+                    size='small'
                     type='danger'
                     className='w-full'
                     onClick={() => {
@@ -322,6 +335,12 @@ const ChannelsActions = ({
           </div>
         </div>
       </div>
+
+      <ChannelLoadOverviewModal
+        t={t}
+        visible={showLoadOverview}
+        onClose={() => setShowLoadOverview(false)}
+      />
     </div>
   );
 };

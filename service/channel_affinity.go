@@ -1,6 +1,8 @@
 package service
 
 import (
+	"context"
+	"errors"
 	"fmt"
 	"hash/fnv"
 	"regexp"
@@ -11,6 +13,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/dto"
+	"github.com/QuantumNous/new-api/logger"
 	"github.com/QuantumNous/new-api/pkg/cachex"
 	"github.com/QuantumNous/new-api/setting/operation_setting"
 	"github.com/QuantumNous/new-api/types"
@@ -319,6 +322,43 @@ func ClearChannelAffinityFailuresByChannel(channelID int) (int, error) {
 		return 0, err
 	}
 	return len(matched), nil
+}
+
+// CountChannelAffinityFailureEntriesByChannel enumerates the affinity failure
+// cache once and buckets the number of active failure entries by channel. Keys
+// are shaped "<suffix>|ch:<id>"; this is keys-only (no per-key Get), and the
+// failure cache TTL is the failover window so it holds few entries — cheap
+// enough for a low-frequency admin/ops overview.
+//
+// Note: this counts entries that have ANY recorded failure for the channel, not
+// only those that have crossed the per-rule failover threshold. It is a
+// "recovery candidate" signal, not an exact tripped count.
+func CountChannelAffinityFailureEntriesByChannel() (map[int]int, error) {
+	cache := getChannelAffinityFailureCache()
+	keys, err := cache.Keys()
+	if err != nil {
+		return nil, err
+	}
+	return countFailureEntries(keys), nil
+}
+
+// countFailureEntries parses failure-cache keys ("<suffix>|ch:<id>") and counts
+// entries per channel id. Malformed keys are skipped.
+func countFailureEntries(keys []string) map[int]int {
+	out := make(map[int]int)
+	const marker = "|ch:"
+	for _, k := range keys {
+		i := strings.LastIndex(k, marker)
+		if i < 0 {
+			continue
+		}
+		id, err := strconv.Atoi(k[i+len(marker):])
+		if err != nil || id <= 0 {
+			continue
+		}
+		out[id]++
+	}
+	return out
 }
 
 func matchAnyRegexCached(patterns []string, s string) bool {
@@ -706,6 +746,27 @@ func GetPreferredChannelByAffinity(c *gin.Context, modelName string, usingGroup 
 			// (or the failure window expires) traffic returns to the original channel.
 			if failoverEnabled && channelAffinityChannelTripped(cacheKeySuffix, channelID, failoverThreshold) {
 				c.Set(ginKeyChannelAffinitySuppressed, true)
+				keyFp := affinityFingerprint(affinityValue)
+				logger.LogInfo(c, fmt.Sprintf(
+					"channel affinity failover suppressed: channel_id=%d rule=%q key_fp=%s threshold=%d window=%ds",
+					channelID, rule.Name, keyFp, failoverThreshold, failoverWindow,
+				))
+				// Surface the trip in the request log the operator already sees.
+				// MarkChannelAffinityUsed only runs on an affinity hit (found=true),
+				// so this map is not clobbered on the suppressed fallback path.
+				c.Set(ginKeyChannelAffinityLogInfo, map[string]interface{}{
+					"reason":              rule.Name,
+					"rule_name":           rule.Name,
+					"using_group":         usingGroup,
+					"model":               modelName,
+					"request_path":        path,
+					"channel_id":          channelID,
+					"key_fp":              keyFp,
+					"key_hint":            buildChannelAffinityKeyHint(affinityValue),
+					"failover_suppressed": true,
+					"failover_threshold":  failoverThreshold,
+					"failover_window":     failoverWindow,
+				})
 				return 0, false
 			}
 			return channelID, true
@@ -867,6 +928,16 @@ func RecordChannelAffinityFailure(c *gin.Context, channelID int, err *types.NewA
 // only channel/upstream failures count toward the failover threshold.
 func isChannelSideFailure(err *types.NewAPIError) bool {
 	if err == nil {
+		return false
+	}
+	// Client-side cancellation (the caller hung up) must never count against a
+	// channel. Streaming relays already swallow this (they return a nil error),
+	// but a non-streaming upstream request cancelled by the client surfaces as a
+	// context.Canceled-wrapped error with StatusCode 0, which would otherwise be
+	// treated as a network-level channel failure below. NewAPIError.Unwrap exposes
+	// the underlying error so errors.Is walks the wrap chain. DeadlineExceeded is
+	// intentionally NOT excluded — that is usually our own upstream timeout.
+	if errors.Is(err, context.Canceled) {
 		return false
 	}
 	if types.IsSkipRetryError(err) {

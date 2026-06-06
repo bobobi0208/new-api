@@ -29,6 +29,7 @@ import {
   SortAsc,
   RefreshCw,
   ArrowUpFromLine,
+  Gauge,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -51,6 +52,7 @@ import {
   handleUpdateAllBalances,
 } from '../lib'
 import { useChannels } from './channels-provider'
+import { ChannelLoadOverviewDialog } from './dialogs/channel-load-overview-dialog'
 
 export function ChannelsPrimaryButtons() {
   const { t } = useTranslation()
@@ -65,6 +67,7 @@ export function ChannelsPrimaryButtons() {
   } = useChannels()
   const queryClient = useQueryClient()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showLoadOverview, setShowLoadOverview] = useState(false)
 
   const handleTagModeToggle = (checked: boolean) => {
     localStorage.setItem('enable-tag-mode', String(checked))
@@ -190,6 +193,15 @@ export function ChannelsPrimaryButtons() {
 
             <DropdownMenuSeparator />
 
+            <DropdownMenuItem onClick={() => setShowLoadOverview(true)}>
+              {t('Channel Load Overview')}
+              <DropdownMenuShortcut>
+                <Gauge className='h-4 w-4' />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={() => {
                 handleFixAbilities(queryClient, (_result) => {
@@ -235,6 +247,11 @@ export function ChannelsPrimaryButtons() {
           })
           setShowDeleteDialog(false)
         }}
+      />
+
+      <ChannelLoadOverviewDialog
+        open={showLoadOverview}
+        onOpenChange={setShowLoadOverview}
       />
     </>
   )

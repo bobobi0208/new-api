@@ -253,6 +253,39 @@ export async function recoverChannelAffinity(
   return res.data
 }
 
+export interface ChannelLoadRow {
+  channel_id: number
+  channel_name: string
+  status: number
+  inflight: number
+  requests: number
+  errors: number
+  rpm: number
+  error_rate: number
+  failover_entries: number
+}
+
+export interface ChannelLoadOverview {
+  window_minutes: number
+  error_log_enabled: boolean
+  channels: ChannelLoadRow[]
+}
+
+/**
+ * Per-channel load overview: in-flight concurrency (this node), recent RPM and
+ * error rate (from logs), and current affinity failure entries. Used to decide
+ * whether to recover affinity / reschedule.
+ */
+export async function getChannelLoadOverview(
+  windowMinutes: number
+): Promise<{ success: boolean; message?: string; data?: ChannelLoadOverview }> {
+  const res = await api.get(
+    '/api/channel/load_overview',
+    channelActionConfig({ params: { window_minutes: windowMinutes } })
+  )
+  return res.data
+}
+
 /**
  * Fix channel abilities
  */

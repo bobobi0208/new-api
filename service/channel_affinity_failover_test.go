@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -49,6 +50,14 @@ func TestIsChannelSideFailure(t *testing.T) {
 	// 2xx → does not count.
 	require.False(t, isChannelSideFailure(
 		types.NewErrorWithStatusCode(errors.New("ok"), "ok", 200)))
+	// Client cancelled (StatusCode 0, wraps context.Canceled) → does not count,
+	// even though the bare network-level branch would otherwise treat it as a
+	// channel failure.
+	require.False(t, isChannelSideFailure(
+		types.NewError(fmt.Errorf("do request failed: %w", context.Canceled), "connection_error")))
+	// Upstream deadline (our own timeout) is still a channel failure → counts.
+	require.True(t, isChannelSideFailure(
+		types.NewError(fmt.Errorf("do request failed: %w", context.DeadlineExceeded), "connection_error")))
 	// nil → does not count.
 	require.False(t, isChannelSideFailure(nil))
 }
@@ -136,6 +145,22 @@ func TestClearChannelAffinityFailuresByChannel(t *testing.T) {
 	// Invalid id is rejected.
 	_, err = ClearChannelAffinityFailuresByChannel(0)
 	require.Error(t, err)
+}
+
+func TestCountFailureEntries(t *testing.T) {
+	keys := []string{
+		channelAffinityFailureKey("ruleA:user1", 5),
+		channelAffinityFailureKey("ruleA:user2", 5),
+		channelAffinityFailureKey("ruleB:user1", 7),
+		"malformed-no-marker",
+		"suffix|ch:notanumber",
+		"suffix|ch:0",  // non-positive id skipped
+		"suffix|ch:-3", // negative skipped
+	}
+	got := countFailureEntries(keys)
+	require.Equal(t, 2, got[5], "two entries for ch:5")
+	require.Equal(t, 1, got[7], "one entry for ch:7")
+	require.Len(t, got, 2, "malformed / non-positive keys are skipped")
 }
 
 // TestChannelAffinity_TripKeepsAffinityAndSuppresses drives the real selection

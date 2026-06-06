@@ -44,3 +44,6 @@ skills-lock.json
 local-logs/
 local-mysql/
 local-redis/
+
+# Local project notes (not tracked)
+CLAUDE.md
