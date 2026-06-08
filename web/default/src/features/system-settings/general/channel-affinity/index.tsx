@@ -115,6 +115,21 @@ export function ChannelAffinitySection(props: Props) {
   const [failureWindow, setFailureWindow] = useState(
     props.defaultValues['channel_affinity_setting.failure_window_seconds']
   )
+  const [failureStatusCodes, setFailureStatusCodes] = useState(
+    props.defaultValues['channel_affinity_setting.failure_status_codes']
+  )
+  const [slowFailoverEnabled, setSlowFailoverEnabled] = useState(
+    props.defaultValues['channel_affinity_setting.slow_failover_enabled']
+  )
+  const [slowResponseThresholdMs, setSlowResponseThresholdMs] = useState(
+    props.defaultValues['channel_affinity_setting.slow_response_threshold_ms']
+  )
+  const [slowResponseThreshold, setSlowResponseThreshold] = useState(
+    props.defaultValues['channel_affinity_setting.slow_response_threshold']
+  )
+  const [slowResponseWindow, setSlowResponseWindow] = useState(
+    props.defaultValues['channel_affinity_setting.slow_response_window_seconds']
+  )
   const [rules, setRules] = useState<AffinityRule[]>(() =>
     parseRules(props.defaultValues['channel_affinity_setting.rules'])
   )
@@ -157,6 +172,23 @@ export function ChannelAffinitySection(props: Props) {
     )
     setFailureWindow(
       props.defaultValues['channel_affinity_setting.failure_window_seconds']
+    )
+    setFailureStatusCodes(
+      props.defaultValues['channel_affinity_setting.failure_status_codes']
+    )
+    setSlowFailoverEnabled(
+      props.defaultValues['channel_affinity_setting.slow_failover_enabled']
+    )
+    setSlowResponseThresholdMs(
+      props.defaultValues['channel_affinity_setting.slow_response_threshold_ms']
+    )
+    setSlowResponseThreshold(
+      props.defaultValues['channel_affinity_setting.slow_response_threshold']
+    )
+    setSlowResponseWindow(
+      props.defaultValues[
+        'channel_affinity_setting.slow_response_window_seconds'
+      ]
     )
     const parsed = parseRules(
       props.defaultValues['channel_affinity_setting.rules']
@@ -288,6 +320,50 @@ export function ChannelAffinitySection(props: Props) {
         updates.push({
           key: 'channel_affinity_setting.failure_window_seconds',
           value: String(failureWindow),
+        })
+      if (
+        failureStatusCodes !==
+        props.defaultValues['channel_affinity_setting.failure_status_codes']
+      )
+        updates.push({
+          key: 'channel_affinity_setting.failure_status_codes',
+          value: String(failureStatusCodes ?? ''),
+        })
+      if (
+        slowFailoverEnabled !==
+        props.defaultValues['channel_affinity_setting.slow_failover_enabled']
+      )
+        updates.push({
+          key: 'channel_affinity_setting.slow_failover_enabled',
+          value: String(slowFailoverEnabled),
+        })
+      if (
+        slowResponseThresholdMs !==
+        props.defaultValues[
+          'channel_affinity_setting.slow_response_threshold_ms'
+        ]
+      )
+        updates.push({
+          key: 'channel_affinity_setting.slow_response_threshold_ms',
+          value: String(slowResponseThresholdMs),
+        })
+      if (
+        slowResponseThreshold !==
+        props.defaultValues['channel_affinity_setting.slow_response_threshold']
+      )
+        updates.push({
+          key: 'channel_affinity_setting.slow_response_threshold',
+          value: String(slowResponseThreshold),
+        })
+      if (
+        slowResponseWindow !==
+        props.defaultValues[
+          'channel_affinity_setting.slow_response_window_seconds'
+        ]
+      )
+        updates.push({
+          key: 'channel_affinity_setting.slow_response_window_seconds',
+          value: String(slowResponseWindow),
         })
 
       const origRules = props.defaultValues['channel_affinity_setting.rules']
@@ -468,6 +544,64 @@ export function ChannelAffinitySection(props: Props) {
               min={0}
               value={failureWindow}
               onChange={(e) => setFailureWindow(Number(e.target.value))}
+            />
+          </div>
+        </div>
+
+        <div className='grid gap-1.5'>
+          <Label>{t('Failure status codes (override global)')}</Label>
+          <Input
+            type='text'
+            placeholder='500-503,524'
+            value={failureStatusCodes ?? ''}
+            onChange={(e) => setFailureStatusCodes(e.target.value)}
+          />
+          <p className='text-xs text-muted-foreground'>
+            {t(
+              'Status codes counted as channel failures for the affinity breaker. Leave empty to use global retry rules. Bypasses the global 504/524 skip list when set.'
+            )}
+          </p>
+        </div>
+
+        <Separator />
+
+        <SettingsSwitchField
+          checked={slowFailoverEnabled}
+          onCheckedChange={setSlowFailoverEnabled}
+          label={t('Enable slow-response failover')}
+          description={t(
+            'Count upstream responses slower than the threshold (TTFB — time to first byte) as failures. When such slow responses accumulate beyond the count within the window, switch to another channel.'
+          )}
+        />
+
+        <div className='grid grid-cols-1 gap-4 md:grid-cols-3'>
+          <div className='grid gap-1.5'>
+            <Label>{t('Slow response threshold (ms)')}</Label>
+            <Input
+              type='number'
+              min={0}
+              value={slowResponseThresholdMs}
+              onChange={(e) =>
+                setSlowResponseThresholdMs(Number(e.target.value))
+              }
+            />
+          </div>
+          <div className='grid gap-1.5'>
+            <Label>{t('Slow response count')}</Label>
+            <Input
+              type='number'
+              min={0}
+              value={slowResponseThreshold}
+              onChange={(e) => setSlowResponseThreshold(Number(e.target.value))}
+            />
+          </div>
+          <div className='grid gap-1.5'>
+            <Label>{t('Slow response window (seconds)')}</Label>
+            <Input
+              type='number'
+              min={0}
+              value={slowResponseWindow}
+              onChange={(e) => setSlowResponseWindow(Number(e.target.value))}
             />
           </div>
         </div>

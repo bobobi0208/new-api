@@ -514,7 +514,13 @@ func doRequest(c *gin.Context, req *http.Request, info *common.RelayInfo) (*http
 		}
 	}
 
+	reqStart := time.Now()
 	resp, err := client.Do(req)
+	// TTFB is recorded on both success and error paths so the affinity circuit
+	// breaker can count slow upstreams even when the upstream returns an error.
+	// On transport-level failure (no resp) we still log the elapsed time so an
+	// upstream that hangs and then RSTs gets attributed to "slow", not "fast fail".
+	c.Set(common2.UpstreamTTFBMsKey, time.Since(reqStart).Milliseconds())
 	if err != nil {
 		logger.LogError(c, "do request failed: "+err.Error())
 		return nil, types.NewError(err, types.ErrorCodeDoRequestFailed, types.ErrOptionWithHideErrMsg("upstream error: do request failed"))

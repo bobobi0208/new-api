@@ -84,6 +84,13 @@ func ShouldRetryByStatusCode(code int) bool {
 	return shouldMatchStatusCodeRanges(AutomaticRetryStatusCodeRanges, code)
 }
 
+// MatchStatusCodeRanges exposes the internal range matcher so other packages can
+// reuse the same parser/matcher pair (ParseHTTPStatusCodeRanges + matcher)
+// without re-implementing the sorted half-open check.
+func MatchStatusCodeRanges(ranges []StatusCodeRange, code int) bool {
+	return shouldMatchStatusCodeRanges(ranges, code)
+}
+
 func statusCodeRangesToString(ranges []StatusCodeRange) string {
 	if len(ranges) == 0 {
 		return ""

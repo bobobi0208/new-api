@@ -140,6 +140,16 @@ const MODELS_SECTIONS = [
             settings['channel_affinity_setting.failure_threshold'],
           'channel_affinity_setting.failure_window_seconds':
             settings['channel_affinity_setting.failure_window_seconds'],
+          'channel_affinity_setting.failure_status_codes':
+            settings['channel_affinity_setting.failure_status_codes'],
+          'channel_affinity_setting.slow_failover_enabled':
+            settings['channel_affinity_setting.slow_failover_enabled'],
+          'channel_affinity_setting.slow_response_threshold_ms':
+            settings['channel_affinity_setting.slow_response_threshold_ms'],
+          'channel_affinity_setting.slow_response_threshold':
+            settings['channel_affinity_setting.slow_response_threshold'],
+          'channel_affinity_setting.slow_response_window_seconds':
+            settings['channel_affinity_setting.slow_response_window_seconds'],
           'channel_affinity_setting.rules':
             settings['channel_affinity_setting.rules'],
         }}

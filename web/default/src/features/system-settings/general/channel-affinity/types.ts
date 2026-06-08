@@ -58,5 +58,10 @@ export interface ChannelAffinitySettings {
   'channel_affinity_setting.failover_enabled': boolean
   'channel_affinity_setting.failure_threshold': number
   'channel_affinity_setting.failure_window_seconds': number
+  'channel_affinity_setting.failure_status_codes': string
+  'channel_affinity_setting.slow_failover_enabled': boolean
+  'channel_affinity_setting.slow_response_threshold_ms': number
+  'channel_affinity_setting.slow_response_threshold': number
+  'channel_affinity_setting.slow_response_window_seconds': number
   'channel_affinity_setting.rules': string
 }

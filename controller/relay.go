@@ -250,6 +250,13 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			}
 		}()
 
+		// Record upstream TTFB into the affinity slow-response counter on both
+		// success and failure paths. The setting/threshold gate lives inside the
+		// recorder, so calling unconditionally here is safe.
+		if ttfbMs := c.GetInt64(common.UpstreamTTFBMsKey); ttfbMs > 0 {
+			service.RecordChannelAffinitySlowResponse(c, channel.Id, ttfbMs)
+		}
+
 		if newAPIError == nil {
 			relayInfo.LastError = nil
 			return

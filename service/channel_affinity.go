@@ -46,6 +46,12 @@ var (
 	channelAffinityFailureCache     *cachex.HybridCache[int]
 
 	channelAffinityRegexCache sync.Map // map[string]*regexp.Regexp
+
+	// Cached parse of ChannelAffinitySetting.FailureStatusCodes. Re-parsed lazily
+	// whenever the raw setting string changes (admin edits in operations panel).
+	affinityFailureCodesMu       sync.RWMutex
+	affinityFailureCodesRawCache string
+	affinityFailureCodesParsed   []operation_setting.StatusCodeRange
 )
 
 type channelAffinityMeta struct {
@@ -155,6 +161,10 @@ func getChannelAffinityFailureCache() *cachex.HybridCache[int] {
 
 func channelAffinityFailureKey(cacheKeySuffix string, channelID int) string {
 	return cacheKeySuffix + "|ch:" + strconv.Itoa(channelID)
+}
+
+func channelAffinitySlowKey(cacheKeySuffix string, channelID int) string {
+	return cacheKeySuffix + "|ch:" + strconv.Itoa(channelID) + "|slow"
 }
 
 func GetChannelAffinityCacheStats() ChannelAffinityCacheStats {
@@ -866,18 +876,32 @@ func RecordChannelAffinity(c *gin.Context, channelID int) {
 	}
 }
 
-// channelAffinityChannelTripped reports whether the failure count for an affinity
-// key + channel has reached the threshold within the active window.
-func channelAffinityChannelTripped(cacheKeySuffix string, channelID int, threshold int) bool {
-	if cacheKeySuffix == "" || channelID <= 0 || threshold <= 0 {
+// channelAffinityChannelTripped reports whether either the status-code failure
+// counter or the slow-response counter for an affinity key + channel has reached
+// its respective threshold. Status-code threshold is per-rule (passed in);
+// slow-response threshold is global (read from settings).
+func channelAffinityChannelTripped(cacheKeySuffix string, channelID int, statusThreshold int) bool {
+	if cacheKeySuffix == "" || channelID <= 0 {
 		return false
 	}
-	failKey := channelAffinityFailureKey(cacheKeySuffix, channelID)
-	count, found, err := getChannelAffinityFailureCache().Get(failKey)
-	if err != nil || !found {
-		return false
+	cache := getChannelAffinityFailureCache()
+
+	if statusThreshold > 0 {
+		failKey := channelAffinityFailureKey(cacheKeySuffix, channelID)
+		if count, found, err := cache.Get(failKey); err == nil && found && count >= statusThreshold {
+			return true
+		}
 	}
-	return count >= threshold
+
+	s := operation_setting.GetChannelAffinitySetting()
+	if s != nil && s.SlowFailoverEnabled && s.SlowResponseThreshold > 0 {
+		slowKey := channelAffinitySlowKey(cacheKeySuffix, channelID)
+		if count, found, err := cache.Get(slowKey); err == nil && found && count >= s.SlowResponseThreshold {
+			return true
+		}
+	}
+
+	return false
 }
 
 // RecordChannelAffinityFailure increments the per-user (affinity key) failure
@@ -924,6 +948,53 @@ func RecordChannelAffinityFailure(c *gin.Context, channelID int, err *types.NewA
 	}
 }
 
+// RecordChannelAffinitySlowResponse increments the slow-response counter for an
+// affinity key + channel when upstream TTFB exceeds SlowResponseThresholdMs.
+// Independent from the status-code failure counter — either tripping causes the
+// affinity binding to fall back to another channel.
+func RecordChannelAffinitySlowResponse(c *gin.Context, channelID int, durationMs int64) {
+	if c == nil || channelID <= 0 {
+		return
+	}
+	s := operation_setting.GetChannelAffinitySetting()
+	if s == nil || !s.SlowFailoverEnabled {
+		return
+	}
+	if s.SlowResponseThresholdMs <= 0 || s.SlowResponseThreshold <= 0 || s.SlowResponseWindowSeconds <= 0 {
+		return
+	}
+	if durationMs < int64(s.SlowResponseThresholdMs) {
+		return
+	}
+	meta, ok := getChannelAffinityMeta(c)
+	if !ok {
+		return
+	}
+	if meta.CacheKeySuffix == "" {
+		return
+	}
+
+	slowKey := channelAffinitySlowKey(meta.CacheKeySuffix, channelID)
+	cache := getChannelAffinityFailureCache()
+	ttl := time.Duration(s.SlowResponseWindowSeconds) * time.Second
+
+	lock := channelAffinityUsageCacheStatsLock(slowKey)
+	lock.Lock()
+	defer lock.Unlock()
+
+	prev, found, getErr := cache.Get(slowKey)
+	if getErr != nil {
+		return
+	}
+	next := 1
+	if found {
+		next = prev + 1
+	}
+	if setErr := cache.SetWithTTL(slowKey, next, ttl); setErr != nil {
+		common.SysError(fmt.Sprintf("channel affinity slow cache set failed: key=%s, err=%v", slowKey, setErr))
+	}
+}
+
 // isChannelSideFailure mirrors the retry classification in controller/relay.go:
 // only channel/upstream failures count toward the failover threshold.
 func isChannelSideFailure(err *types.NewAPIError) bool {
@@ -957,7 +1028,44 @@ func isChannelSideFailure(err *types.NewAPIError) bool {
 		// network / connection level failures
 		return true
 	}
-	return operation_setting.ShouldRetryByStatusCode(code)
+	return channelAffinityMatchFailureStatusCode(code)
+}
+
+// channelAffinityMatchFailureStatusCode decides whether a status code should
+// count as a channel-side failure for the affinity circuit-breaker. When admin
+// has provided a custom FailureStatusCodes ranges string, those ranges fully
+// override the global classifier — including the global alwaysSkipRetryStatusCodes
+// hardcoded list (504/524). Empty string = fall back to ShouldRetryByStatusCode.
+func channelAffinityMatchFailureStatusCode(code int) bool {
+	s := operation_setting.GetChannelAffinitySetting()
+	if s == nil {
+		return operation_setting.ShouldRetryByStatusCode(code)
+	}
+	raw := strings.TrimSpace(s.FailureStatusCodes)
+	if raw == "" {
+		return operation_setting.ShouldRetryByStatusCode(code)
+	}
+
+	affinityFailureCodesMu.RLock()
+	cachedRaw := affinityFailureCodesRawCache
+	cachedRanges := affinityFailureCodesParsed
+	affinityFailureCodesMu.RUnlock()
+
+	if cachedRaw != raw {
+		ranges, err := operation_setting.ParseHTTPStatusCodeRanges(raw)
+		if err != nil {
+			// Fall back to global on parse error; admin will see the error in the
+			// settings save path and can correct it.
+			return operation_setting.ShouldRetryByStatusCode(code)
+		}
+		affinityFailureCodesMu.Lock()
+		affinityFailureCodesRawCache = raw
+		affinityFailureCodesParsed = ranges
+		cachedRanges = ranges
+		affinityFailureCodesMu.Unlock()
+	}
+
+	return operation_setting.MatchStatusCodeRanges(cachedRanges, code)
 }
 
 type ChannelAffinityUsageCacheStats struct {

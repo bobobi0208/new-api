@@ -181,6 +181,11 @@ var CohereSafetySetting string
 const (
 	RequestIdKey         = "X-Oneapi-Request-Id"
 	UpstreamRequestIdKey = "X-Upstream-Request-Id"
+
+	// UpstreamTTFBMsKey stores upstream time-to-first-byte in milliseconds (int64)
+	// on the gin.Context. Set at client.Do return (status line + headers arrived);
+	// used by the channel-affinity slow-response circuit breaker.
+	UpstreamTTFBMsKey = "upstream_ttfb_ms"
 )
 
 const (

@@ -46,6 +46,22 @@ type ChannelAffinitySetting struct {
 	FailureThreshold     int  `json:"failure_threshold"`
 	FailureWindowSeconds int  `json:"failure_window_seconds"`
 
+	// Custom failure status codes for the affinity counter only. When non-empty,
+	// these ranges override the global AutomaticRetryStatusCodeRanges and bypass
+	// the global alwaysSkipRetryStatusCodes (504/524) classifier. Empty string =
+	// fall back to global retry rules.
+	FailureStatusCodes string `json:"failure_status_codes"`
+
+	// Slow-response circuit breaker: when upstream TTFB (time-to-first-byte) on
+	// a channel exceeds SlowResponseThresholdMs more than SlowResponseThreshold
+	// times within SlowResponseWindowSeconds, that channel is suppressed for
+	// the same affinity key. Independent counter from the status-code breaker
+	// above — either one tripping causes a switch.
+	SlowFailoverEnabled       bool `json:"slow_failover_enabled"`
+	SlowResponseThresholdMs   int  `json:"slow_response_threshold_ms"`
+	SlowResponseThreshold     int  `json:"slow_response_threshold"`
+	SlowResponseWindowSeconds int  `json:"slow_response_window_seconds"`
+
 	Rules []ChannelAffinityRule `json:"rules"`
 }
 
@@ -88,13 +104,18 @@ func buildPassHeaderTemplate(headers []string) map[string]interface{} {
 }
 
 var channelAffinitySetting = ChannelAffinitySetting{
-	Enabled:              true,
-	SwitchOnSuccess:      true,
-	MaxEntries:           100_000,
-	DefaultTTLSeconds:    3600,
-	FailoverEnabled:      true,
-	FailureThreshold:     3,
-	FailureWindowSeconds: 60,
+	Enabled:                   true,
+	SwitchOnSuccess:           true,
+	MaxEntries:                100_000,
+	DefaultTTLSeconds:         3600,
+	FailoverEnabled:           true,
+	FailureThreshold:          3,
+	FailureWindowSeconds:      60,
+	FailureStatusCodes:        "",
+	SlowFailoverEnabled:       false,
+	SlowResponseThresholdMs:   30000,
+	SlowResponseThreshold:     3,
+	SlowResponseWindowSeconds: 60,
 	Rules: []ChannelAffinityRule{
 		{
 			Name:       "codex cli trace",
