@@ -102,6 +102,11 @@ export function useSidebarData(): SidebarData {
           configUrls: ['/usage-logs/drawing', '/usage-logs/task'],
           icon: ListTodo,
         },
+        {
+          title: t('Availability Monitor'),
+          url: '/availability',
+          icon: Gauge,
+        },
       ],
     },
     {
@@ -144,11 +149,6 @@ export function useSidebarData(): SidebarData {
         title: t('Channels'),
         url: '/channels',
         icon: Radio,
-      },
-      {
-        title: t('Availability Monitor'),
-        url: '/availability',
-        icon: Gauge,
       },
       {
         title: t('Models'),

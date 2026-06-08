@@ -28,66 +28,68 @@ export function AvailabilityPage() {
   }
 
   return (
-    <SectionPageLayout>
-      <SectionPageLayout.Title>
-        {t('Availability Monitor')}
-      </SectionPageLayout.Title>
-      <SectionPageLayout.Actions>
-        <div className='flex items-center gap-2'>
-          <RangeTabs value={range} onChange={setRange} />
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => query.refetch()}
-            disabled={query.isFetching}
-          >
-            <RefreshCw
-              className={cn(
-                'size-3.5',
-                query.isFetching && 'animate-spin'
-              )}
+    <>
+      <SectionPageLayout>
+        <SectionPageLayout.Title>
+          {t('Availability Monitor')}
+        </SectionPageLayout.Title>
+        <SectionPageLayout.Actions>
+          <div className='flex items-center gap-2'>
+            <RangeTabs value={range} onChange={setRange} />
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => query.refetch()}
+              disabled={query.isFetching}
+            >
+              <RefreshCw
+                className={cn(
+                  'size-3.5',
+                  query.isFetching && 'animate-spin'
+                )}
+              />
+              <span className='hidden sm:inline'>{t('Refresh')}</span>
+            </Button>
+          </div>
+        </SectionPageLayout.Actions>
+        <SectionPageLayout.Content>
+          <div className='flex flex-col gap-5'>
+            <Summary
+              total={groups.length}
+              generatedAt={generatedAt}
+              loading={query.isLoading}
             />
-            <span className='hidden sm:inline'>{t('Refresh')}</span>
-          </Button>
-        </div>
-      </SectionPageLayout.Actions>
-      <SectionPageLayout.Content>
-        <div className='flex flex-col gap-5'>
-          <Summary
-            total={groups.length}
-            generatedAt={generatedAt}
-            loading={query.isLoading}
-          />
 
-          {query.isError ? (
-            <div className='border-destructive/40 bg-destructive/5 text-destructive rounded-lg border px-4 py-3 text-sm'>
-              {(query.error as Error)?.message || t('Failed to load')}
-            </div>
-          ) : null}
+            {query.isError ? (
+              <div className='border-destructive/40 bg-destructive/5 text-destructive rounded-lg border px-4 py-3 text-sm'>
+                {(query.error as Error)?.message || t('Failed to load')}
+              </div>
+            ) : null}
 
-          {query.isLoading ? (
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
-              {Array.from({ length: 6 }).map((_, i) => (
-                <Skeleton key={i} className='h-44 rounded-2xl' />
-              ))}
-            </div>
-          ) : groups.length === 0 ? (
-            <div className='border-border bg-muted/20 text-muted-foreground flex h-40 w-full items-center justify-center rounded-lg border border-dashed text-sm'>
-              {t('No groups available')}
-            </div>
-          ) : (
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
-              {groups.map((g) => (
-                <GroupCard
-                  key={g.group}
-                  snapshot={g}
-                  onClick={() => openGroup(g.group)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </SectionPageLayout.Content>
+            {query.isLoading ? (
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className='h-44 rounded-2xl' />
+                ))}
+              </div>
+            ) : groups.length === 0 ? (
+              <div className='border-border bg-muted/20 text-muted-foreground flex h-40 w-full items-center justify-center rounded-lg border border-dashed text-sm'>
+                {t('No groups available')}
+              </div>
+            ) : (
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3'>
+                {groups.map((g) => (
+                  <GroupCard
+                    key={g.group}
+                    snapshot={g}
+                    onClick={() => openGroup(g.group)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </SectionPageLayout.Content>
+      </SectionPageLayout>
 
       <GroupDetailSheet
         group={activeGroup}
@@ -98,7 +100,7 @@ export function AvailabilityPage() {
         range={detailRange}
         onRangeChange={setDetailRange}
       />
-    </SectionPageLayout>
+    </>
   )
 }
 
