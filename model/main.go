@@ -285,10 +285,17 @@ func migrateDB() error {
 		&SensitiveWordHit{},
 		&ReconciliationRecord{},
 		&ReconciliationChannelConfig{},
+		&ProbeDefenseSource{},
+		&ProbeDefenseSignature{},
+		&ProbeDefenseGroupPolicy{},
+		&ProbeDefenseEvent{},
 		&CommissionBill{},
 		&WithdrawRequest{},
 	)
 	if err != nil {
+		return err
+	}
+	if err := SeedDefaultProbeDefenseData(); err != nil {
 		return err
 	}
 	if common.UsingSQLite {
@@ -340,6 +347,10 @@ func migrateDBFast() error {
 		{&SensitiveWordHit{}, "SensitiveWordHit"},
 		{&ReconciliationRecord{}, "ReconciliationRecord"},
 		{&ReconciliationChannelConfig{}, "ReconciliationChannelConfig"},
+		{&ProbeDefenseSource{}, "ProbeDefenseSource"},
+		{&ProbeDefenseSignature{}, "ProbeDefenseSignature"},
+		{&ProbeDefenseGroupPolicy{}, "ProbeDefenseGroupPolicy"},
+		{&ProbeDefenseEvent{}, "ProbeDefenseEvent"},
 		{&CommissionBill{}, "CommissionBill"},
 		{&WithdrawRequest{}, "WithdrawRequest"},
 	}

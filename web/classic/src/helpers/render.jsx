@@ -81,6 +81,7 @@ import {
   Server,
   CalendarClock,
   ShieldAlert,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   SiAtlassian,
@@ -144,6 +145,8 @@ export function getLucideIcon(key, selected = false) {
       return <Gift {...commonProps} color={iconColor} />;
     case 'sensitive_monitor':
       return <ShieldAlert {...commonProps} color={iconColor} />;
+    case 'probe_defense':
+      return <ShieldCheck {...commonProps} color={iconColor} />;
     case 'user':
     case 'personal':
       return <User {...commonProps} color={iconColor} />;

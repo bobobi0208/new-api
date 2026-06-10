@@ -286,6 +286,11 @@ export default function SettingsSidebarModulesAdmin(props) {
           title: t('上游对账'),
           description: t('上游账单对账'),
         },
+        {
+          key: 'probe_defense',
+          title: t('探针防御'),
+          description: t('分组探针防御配置'),
+        },
         { key: 'user', title: t('用户管理'), description: t('用户账户管理') },
         {
           key: 'setting',

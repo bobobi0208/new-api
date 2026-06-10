@@ -360,6 +360,23 @@ func SetApiRouter(router *gin.Engine) {
 			sensitiveMonitorRoute.POST("/seed_defaults", controller.SeedDefaultSensitiveMonitorRules)
 		}
 
+		probeDefenseRoute := apiRouter.Group("/probe_defense")
+		probeDefenseRoute.Use(middleware.AdminAuth())
+		{
+			probeDefenseRoute.GET("/sources", controller.GetProbeDefenseSources)
+			probeDefenseRoute.POST("/sources", controller.CreateProbeDefenseSource)
+			probeDefenseRoute.PUT("/sources/:id", controller.UpdateProbeDefenseSource)
+			probeDefenseRoute.GET("/signatures", controller.GetProbeDefenseSignatures)
+			probeDefenseRoute.POST("/signatures", controller.CreateProbeDefenseSignature)
+			probeDefenseRoute.PUT("/signatures/:id", controller.UpdateProbeDefenseSignature)
+			probeDefenseRoute.DELETE("/signatures/:id", controller.DeleteProbeDefenseSignature)
+			probeDefenseRoute.GET("/policies", controller.GetProbeDefensePolicies)
+			probeDefenseRoute.PUT("/policies/:group", controller.UpdateProbeDefensePolicy)
+			probeDefenseRoute.GET("/events", controller.GetProbeDefenseEvents)
+			probeDefenseRoute.POST("/test_match", controller.ProbeDefenseTestMatch)
+			probeDefenseRoute.POST("/seed_defaults", controller.SeedDefaultProbeDefense)
+		}
+
 		RegisterReconciliationRoutes(apiRouter)
 
 		dataRoute := apiRouter.Group("/data")

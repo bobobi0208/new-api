@@ -48,6 +48,7 @@ import Playground from './pages/Playground';
 import Subscription from './pages/Subscription';
 import SensitiveMonitor from './pages/SensitiveMonitor';
 import Reconciliation from './pages/Reconciliation';
+import ProbeDefense from './pages/ProbeDefense';
 import OAuth2Callback from './components/auth/OAuth2Callback';
 import PersonalSetting from './components/settings/PersonalSetting';
 import Setup from './pages/Setup';
@@ -187,6 +188,14 @@ function App() {
           element={
             <AdminRoute>
               <Reconciliation />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path='/console/probe-defense'
+          element={
+            <AdminRoute>
+              <ProbeDefense />
             </AdminRoute>
           }
         />

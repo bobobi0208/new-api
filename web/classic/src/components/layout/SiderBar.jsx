@@ -41,6 +41,7 @@ const routerMap = {
   subscription: '/console/subscription',
   sensitive_monitor: '/console/sensitive-monitor',
   reconciliation: '/console/reconciliation',
+  probe_defense: '/console/probe-defense',
   log: '/console/log',
   midjourney: '/console/midjourney',
   setting: '/console/setting',
@@ -196,6 +197,12 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('上游对账'),
         itemKey: 'reconciliation',
         to: '/reconciliation',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('探针防御'),
+        itemKey: 'probe_defense',
+        to: '/probe-defense',
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {

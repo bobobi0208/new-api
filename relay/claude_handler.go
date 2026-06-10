@@ -225,7 +225,49 @@ func ClaudeHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *typ
 }
 
 func applyClaudeProbeDefense(c *gin.Context, info *relaycommon.RelayInfo, request *dto.ClaudeRequest) {
-	if info == nil || request == nil || !info.ChannelSetting.ProbeDefense.Enabled {
+	if info == nil || request == nil {
+		return
+	}
+
+	groupName := strings.TrimSpace(info.UsingGroup)
+	if groupName != "" {
+		decision, err := probe_defense.EvaluateGroupPolicy(probe_defense.EvaluationInput{
+			GroupName: groupName,
+			ChannelID: info.ChannelId,
+			ModelName: request.Model,
+			Protocol:  probe_defense.ProtocolClaudeMessages,
+			Text:      probe_defense.CollectClaudeRequestText(request),
+			RequestID: info.RequestId,
+		})
+		if err != nil {
+			logger.LogWarn(c, fmt.Sprintf("probe defense group policy evaluation failed: group=%s channel_id=%d err=%s", groupName, info.ChannelId, err.Error()))
+		} else if decision.PolicyFound {
+			if !decision.Matched {
+				return
+			}
+			if decision.Action == probe_defense.ActionLogOnly {
+				c.Set("probe_defense_matched", true)
+				c.Set("probe_defense_source", decision.Result.SourceKey)
+				c.Set("probe_defense_topic", decision.Result.Topic)
+				logger.LogInfo(c, fmt.Sprintf(
+					"probe defense log-only match: group=%s channel_id=%d source=%s topic=%s signature=%s",
+					groupName, info.ChannelId, decision.Result.SourceKey, decision.Result.Topic, decision.Result.SignatureName,
+				))
+				return
+			}
+			if decision.Action == probe_defense.ActionTargetIncomplete {
+				logger.LogWarn(c, fmt.Sprintf(
+					"probe defense matched but group target is incomplete: group=%s channel_id=%d source=%s topic=%s signature=%s",
+					groupName, info.ChannelId, decision.Result.SourceKey, decision.Result.Topic, decision.Result.SignatureName,
+				))
+				return
+			}
+			applyProbeDefenseTransfer(c, info, decision.TargetURL, decision.TargetAPIKey, decision.Result, groupName)
+			return
+		}
+	}
+
+	if !info.ChannelSetting.ProbeDefense.Enabled {
 		return
 	}
 
@@ -247,16 +289,21 @@ func applyClaudeProbeDefense(c *gin.Context, info *relaycommon.RelayInfo, reques
 		return
 	}
 
+	applyProbeDefenseTransfer(c, info, targetURL, targetAPIKey, result, "channel")
+}
+
+func applyProbeDefenseTransfer(c *gin.Context, info *relaycommon.RelayInfo, targetURL string, targetAPIKey string, result probe_defense.MatchResult, scope string) {
 	originalBaseURL := info.ChannelBaseUrl
 	info.ChannelBaseUrl = targetURL
 	info.ApiKey = targetAPIKey
 	common.SetContextKey(c, constant.ContextKeyChannelBaseUrl, targetURL)
 	common.SetContextKey(c, constant.ContextKeyChannelKey, targetAPIKey)
 	c.Set("probe_defense_matched", true)
+	c.Set("probe_defense_source", result.SourceKey)
 	c.Set("probe_defense_topic", result.Topic)
 	c.Set("probe_defense_score", result.Score)
 	logger.LogInfo(c, fmt.Sprintf(
-		"probe defense transferred request: channel_id=%d topic=%s score=%.2f rules=%s target_url=%s original_base_url=%s",
-		info.ChannelId, result.Topic, result.Score, strings.Join(result.RuleIDs, ","), targetURL, originalBaseURL,
+		"probe defense transferred request: scope=%s channel_id=%d source=%s topic=%s score=%.2f rules=%s target_url=%s original_base_url=%s",
+		scope, info.ChannelId, result.SourceKey, result.Topic, result.Score, strings.Join(result.RuleIDs, ","), targetURL, originalBaseURL,
 	))
 }
