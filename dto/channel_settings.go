@@ -1,12 +1,19 @@
 package dto
 
+type ProbeDefenseSettings struct {
+	Enabled      bool   `json:"enabled,omitempty"`
+	TargetURL    string `json:"target_url,omitempty"`
+	TargetAPIKey string `json:"target_api_key,omitempty"`
+}
+
 type ChannelSettings struct {
-	ForceFormat            bool   `json:"force_format,omitempty"`
-	ThinkingToContent      bool   `json:"thinking_to_content,omitempty"`
-	Proxy                  string `json:"proxy"`
-	PassThroughBodyEnabled bool   `json:"pass_through_body_enabled,omitempty"`
-	SystemPrompt           string `json:"system_prompt,omitempty"`
-	SystemPromptOverride   bool   `json:"system_prompt_override,omitempty"`
+	ForceFormat            bool                 `json:"force_format,omitempty"`
+	ThinkingToContent      bool                 `json:"thinking_to_content,omitempty"`
+	Proxy                  string               `json:"proxy"`
+	PassThroughBodyEnabled bool                 `json:"pass_through_body_enabled,omitempty"`
+	SystemPrompt           string               `json:"system_prompt,omitempty"`
+	SystemPromptOverride   bool                 `json:"system_prompt_override,omitempty"`
+	ProbeDefense           ProbeDefenseSettings `json:"probe_defense,omitempty"`
 }
 
 type VertexKeyType string

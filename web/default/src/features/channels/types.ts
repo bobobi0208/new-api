@@ -86,6 +86,11 @@ export interface ChannelSettings {
   pass_through_body_enabled?: boolean
   system_prompt?: string
   system_prompt_override?: boolean
+  probe_defense?: {
+    enabled?: boolean
+    target_url?: string
+    target_api_key?: string
+  }
 }
 
 export interface ChannelOtherSettings {

@@ -45,6 +45,7 @@ import {
   Settings,
   SlidersHorizontal,
   Wand2,
+  ShieldCheck,
 } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
@@ -224,6 +225,8 @@ function hasAdvancedSettingsValues(values: ChannelFormValues): boolean {
     values.thinking_to_content ||
     values.pass_through_body_enabled ||
     values.system_prompt_override ||
+    values.probe_defense_enabled ||
+    values.probe_defense_target_url?.trim() ||
     values.claude_beta_query ||
     values.upstream_model_update_check_enabled ||
     values.upstream_model_update_auto_sync_enabled ||
@@ -3333,6 +3336,79 @@ export function ChannelMutateDrawer({
                                   onCheckedChange={field.onChange}
                                 />
                               </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
+                      <div className='border-border/60 flex flex-col gap-3 border-y py-4'>
+                        <SubHeading
+                          title={t('探针防御')}
+                          icon={<ShieldCheck className='h-3.5 w-3.5' />}
+                        />
+                        <div className='divide-border space-y-0 divide-y border-y'>
+                          <FormField
+                            control={form.control}
+                            name='probe_defense_enabled'
+                            render={({ field }) => (
+                              <FormItem className='flex items-center justify-between gap-3 px-4 py-3'>
+                                <div className='space-y-0.5'>
+                                  <FormLabel className='text-sm'>
+                                    {t('开启探针防御')}
+                                  </FormLabel>
+                                  <FormDescription>
+                                    {t('命中高置信探针后转移到隔离目标')}
+                                  </FormDescription>
+                                </div>
+                                <FormControl>
+                                  <Switch
+                                    checked={field.value}
+                                    onCheckedChange={field.onChange}
+                                  />
+                                </FormControl>
+                              </FormItem>
+                            )}
+                          />
+                        </div>
+
+                        <FormField
+                          control={form.control}
+                          name='probe_defense_target_url'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('转移目标 URL')}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder='http://127.0.0.1:3000'
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {t('填写隔离服务地址，系统会自动请求 /v1/messages')}
+                              </FormDescription>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name='probe_defense_target_api_key'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t('转移目标 API Key')}</FormLabel>
+                              <FormControl>
+                                <Input
+                                  type='password'
+                                  placeholder={t('留空则保留已保存的密钥')}
+                                  autoComplete='new-password'
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormDescription>
+                                {t('保存后不会在编辑页回显完整密钥')}
+                              </FormDescription>
+                              <FormMessage />
                             </FormItem>
                           )}
                         />

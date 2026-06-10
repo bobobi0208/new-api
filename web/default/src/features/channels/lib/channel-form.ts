@@ -182,6 +182,9 @@ export const channelFormSchema = z
     pass_through_body_enabled: z.boolean().optional(),
     system_prompt: z.string().optional(),
     system_prompt_override: z.boolean().optional(),
+    probe_defense_enabled: z.boolean().optional(),
+    probe_defense_target_url: z.string().optional(),
+    probe_defense_target_api_key: z.string().optional(),
     // Type-specific settings (stored in settings JSON)
     is_enterprise_account: z.boolean().optional(), // OpenRouter specific
     vertex_key_type: z.enum(['json', 'api_key']).optional(), // Vertex AI specific
@@ -300,6 +303,9 @@ export const CHANNEL_FORM_DEFAULT_VALUES: ChannelFormValues = {
   pass_through_body_enabled: false,
   system_prompt: '',
   system_prompt_override: false,
+  probe_defense_enabled: false,
+  probe_defense_target_url: '',
+  probe_defense_target_api_key: '',
   // Type-specific settings
   is_enterprise_account: false,
   vertex_key_type: 'json',
@@ -336,6 +342,9 @@ export function transformChannelToFormDefaults(
     pass_through_body_enabled: false,
     system_prompt: '',
     system_prompt_override: false,
+    probe_defense_enabled: false,
+    probe_defense_target_url: '',
+    probe_defense_target_api_key: '',
   }
 
   if (channel.setting) {
@@ -348,6 +357,13 @@ export function transformChannelToFormDefaults(
         pass_through_body_enabled: parsed.pass_through_body_enabled || false,
         system_prompt: parsed.system_prompt || '',
         system_prompt_override: parsed.system_prompt_override || false,
+        probe_defense_enabled: parsed.probe_defense?.enabled === true,
+        probe_defense_target_url: parsed.probe_defense?.target_url || '',
+        probe_defense_target_api_key:
+          parsed.probe_defense?.target_api_key ===
+          '__PROBE_DEFENSE_TARGET_API_KEY_CONFIGURED__'
+            ? ''
+            : parsed.probe_defense?.target_api_key || '',
       }
     } catch (error) {
       // eslint-disable-next-line no-console
@@ -457,6 +473,11 @@ function buildSettingJSON(formData: ChannelFormValues): string {
     pass_through_body_enabled: formData.pass_through_body_enabled || false,
     system_prompt: formData.system_prompt || '',
     system_prompt_override: formData.system_prompt_override || false,
+    probe_defense: {
+      enabled: formData.probe_defense_enabled || false,
+      target_url: formData.probe_defense_target_url || '',
+      target_api_key: formData.probe_defense_target_api_key || '',
+    },
   }
   return JSON.stringify(settingObj)
 }

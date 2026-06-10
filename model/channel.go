@@ -953,6 +953,8 @@ func SearchTags(keyword string, group string, model string, idSort bool) ([]*str
 	return tags, nil
 }
 
+const ProbeDefenseMaskedTargetAPIKey = "__PROBE_DEFENSE_TARGET_API_KEY_CONFIGURED__"
+
 func (channel *Channel) ValidateSettings() error {
 	channelParams := &dto.ChannelSettings{}
 	if channel.Setting != nil && *channel.Setting != "" {
@@ -984,6 +986,46 @@ func (channel *Channel) SetSetting(setting dto.ChannelSettings) {
 		return
 	}
 	channel.Setting = common.GetPointer[string](string(settingBytes))
+}
+
+func (channel *Channel) MaskProbeDefenseTargetAPIKey() {
+	if channel == nil || channel.Setting == nil || strings.TrimSpace(*channel.Setting) == "" {
+		return
+	}
+	setting := dto.ChannelSettings{}
+	if err := common.Unmarshal([]byte(*channel.Setting), &setting); err != nil {
+		return
+	}
+	if strings.TrimSpace(setting.ProbeDefense.TargetAPIKey) == "" {
+		return
+	}
+	setting.ProbeDefense.TargetAPIKey = ProbeDefenseMaskedTargetAPIKey
+	channel.SetSetting(setting)
+}
+
+func (channel *Channel) PreserveProbeDefenseTargetAPIKey(origin *Channel) {
+	if channel == nil || origin == nil || channel.Setting == nil || strings.TrimSpace(*channel.Setting) == "" {
+		return
+	}
+	setting := dto.ChannelSettings{}
+	if err := common.Unmarshal([]byte(*channel.Setting), &setting); err != nil {
+		return
+	}
+	incomingKey := strings.TrimSpace(setting.ProbeDefense.TargetAPIKey)
+	if incomingKey != "" && incomingKey != ProbeDefenseMaskedTargetAPIKey {
+		return
+	}
+	if origin.Setting == nil || strings.TrimSpace(*origin.Setting) == "" {
+		setting.ProbeDefense.TargetAPIKey = ""
+		channel.SetSetting(setting)
+		return
+	}
+	originSetting := dto.ChannelSettings{}
+	if err := common.Unmarshal([]byte(*origin.Setting), &originSetting); err != nil {
+		return
+	}
+	setting.ProbeDefense.TargetAPIKey = originSetting.ProbeDefense.TargetAPIKey
+	channel.SetSetting(setting)
 }
 
 func (channel *Channel) GetOtherSettings() dto.ChannelOtherSettings {

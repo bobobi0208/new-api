@@ -11,6 +11,7 @@ import (
 	"github.com/QuantumNous/new-api/constant"
 	"github.com/QuantumNous/new-api/dto"
 	"github.com/QuantumNous/new-api/logger"
+	"github.com/QuantumNous/new-api/probe_defense"
 	relaycommon "github.com/QuantumNous/new-api/relay/common"
 	"github.com/QuantumNous/new-api/relay/helper"
 	"github.com/QuantumNous/new-api/service"
@@ -35,6 +36,8 @@ func ClaudeHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *typ
 	if err != nil {
 		return types.NewError(fmt.Errorf("failed to copy request to ClaudeRequest: %w", err), types.ErrorCodeInvalidRequest, types.ErrOptionWithSkipRetry())
 	}
+
+	applyClaudeProbeDefense(c, info, request)
 
 	err = helper.ModelMappedHelper(c, info, request)
 	if err != nil {
@@ -219,4 +222,41 @@ func ClaudeHelper(c *gin.Context, info *relaycommon.RelayInfo) (newAPIError *typ
 
 	service.PostTextConsumeQuota(c, info, usage.(*dto.Usage), nil)
 	return nil
+}
+
+func applyClaudeProbeDefense(c *gin.Context, info *relaycommon.RelayInfo, request *dto.ClaudeRequest) {
+	if info == nil || request == nil || !info.ChannelSetting.ProbeDefense.Enabled {
+		return
+	}
+
+	result := probe_defense.MatchClaudeRequest(request)
+	if !result.Matched {
+		return
+	}
+
+	targetURL := probe_defense.NormalizeTargetBaseURL(info.ChannelSetting.ProbeDefense.TargetURL)
+	targetAPIKey := strings.TrimSpace(info.ChannelSetting.ProbeDefense.TargetAPIKey)
+	if targetURL == "" || targetAPIKey == "" {
+		logger.LogWarn(c, fmt.Sprintf(
+			"probe defense matched but target is incomplete: channel_id=%d topic=%s score=%.2f rules=%s",
+			info.ChannelId,
+			result.Topic,
+			result.Score,
+			strings.Join(result.RuleIDs, ","),
+		))
+		return
+	}
+
+	originalBaseURL := info.ChannelBaseUrl
+	info.ChannelBaseUrl = targetURL
+	info.ApiKey = targetAPIKey
+	common.SetContextKey(c, constant.ContextKeyChannelBaseUrl, targetURL)
+	common.SetContextKey(c, constant.ContextKeyChannelKey, targetAPIKey)
+	c.Set("probe_defense_matched", true)
+	c.Set("probe_defense_topic", result.Topic)
+	c.Set("probe_defense_score", result.Score)
+	logger.LogInfo(c, fmt.Sprintf(
+		"probe defense transferred request: channel_id=%d topic=%s score=%.2f rules=%s target_url=%s original_base_url=%s",
+		info.ChannelId, result.Topic, result.Score, strings.Join(result.RuleIDs, ","), targetURL, originalBaseURL,
+	))
 }
