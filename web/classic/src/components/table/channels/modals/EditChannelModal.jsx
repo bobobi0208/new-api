@@ -195,6 +195,9 @@ const EditChannelModal = (props) => {
     pass_through_body_enabled: false,
     system_prompt: '',
     system_prompt_override: false,
+    probe_defense_enabled: false,
+    probe_defense_target_url: '',
+    probe_defense_target_api_key: '',
     settings: '',
     // 仅 Vertex: 密钥格式（存入 settings.vertex_key_type）
     vertex_key_type: 'json',
@@ -544,6 +547,10 @@ const EditChannelModal = (props) => {
     proxy: '',
     pass_through_body_enabled: false,
     system_prompt: '',
+    system_prompt_override: false,
+    probe_defense_enabled: false,
+    probe_defense_target_url: '',
+    probe_defense_target_api_key: '',
   });
   const showApiConfigCard = true; // 控制是否显示 API 配置卡片
   const getInitValues = () => ({ ...originInputs });
@@ -897,6 +904,16 @@ const EditChannelModal = (props) => {
           data.system_prompt = parsedSettings.system_prompt || '';
           data.system_prompt_override =
             parsedSettings.system_prompt_override || false;
+          const probeDefenseSettings = parsedSettings.probe_defense || {};
+          data.probe_defense_enabled =
+            probeDefenseSettings.enabled === true;
+          data.probe_defense_target_url =
+            probeDefenseSettings.target_url || '';
+          data.probe_defense_target_api_key =
+            probeDefenseSettings.target_api_key ===
+            '__PROBE_DEFENSE_TARGET_API_KEY_CONFIGURED__'
+              ? ''
+              : probeDefenseSettings.target_api_key || '';
         } catch (error) {
           console.error('解析渠道设置失败:', error);
           data.force_format = false;
@@ -905,6 +922,9 @@ const EditChannelModal = (props) => {
           data.pass_through_body_enabled = false;
           data.system_prompt = '';
           data.system_prompt_override = false;
+          data.probe_defense_enabled = false;
+          data.probe_defense_target_url = '';
+          data.probe_defense_target_api_key = '';
         }
       } else {
         data.force_format = false;
@@ -913,6 +933,9 @@ const EditChannelModal = (props) => {
         data.pass_through_body_enabled = false;
         data.system_prompt = '';
         data.system_prompt_override = false;
+        data.probe_defense_enabled = false;
+        data.probe_defense_target_url = '';
+        data.probe_defense_target_api_key = '';
       }
 
       if (data.settings) {
@@ -1022,6 +1045,10 @@ const EditChannelModal = (props) => {
         pass_through_body_enabled: data.pass_through_body_enabled,
         system_prompt: data.system_prompt,
         system_prompt_override: data.system_prompt_override || false,
+        probe_defense_enabled: data.probe_defense_enabled || false,
+        probe_defense_target_url: data.probe_defense_target_url || '',
+        probe_defense_target_api_key:
+          data.probe_defense_target_api_key || '',
       });
       initialModelsRef.current = (data.models || [])
         .map((model) => (model || '').trim())
@@ -1781,6 +1808,11 @@ const EditChannelModal = (props) => {
       pass_through_body_enabled: localInputs.pass_through_body_enabled || false,
       system_prompt: localInputs.system_prompt || '',
       system_prompt_override: localInputs.system_prompt_override || false,
+      probe_defense: {
+        enabled: localInputs.probe_defense_enabled === true,
+        target_url: localInputs.probe_defense_target_url || '',
+        target_api_key: localInputs.probe_defense_target_api_key || '',
+      },
     };
     localInputs.setting = JSON.stringify(channelExtraSettings);
 
@@ -1865,6 +1897,9 @@ const EditChannelModal = (props) => {
     delete localInputs.pass_through_body_enabled;
     delete localInputs.system_prompt;
     delete localInputs.system_prompt_override;
+    delete localInputs.probe_defense_enabled;
+    delete localInputs.probe_defense_target_url;
+    delete localInputs.probe_defense_target_api_key;
     delete localInputs.is_enterprise_account;
     // 顶层的 vertex_key_type 不应发送给后端
     delete localInputs.vertex_key_type;
@@ -2586,6 +2621,54 @@ const EditChannelModal = (props) => {
 
                   {inputs.type === 14 && (
                     <Form.Switch field='claude_beta_query' label={t('Claude 强制 beta=true')} checkedText={t('开')} uncheckedText={t('关')} onChange={(value) => handleChannelOtherSettingsChange('claude_beta_query', value)} extraText={t('开启后，该渠道请求 Claude 时将强制追加 ?beta=true（无需客户端手动传参）')} />
+                  )}
+
+                  {inputs.type === 14 && (
+                    <div className='mb-4 pb-4 border-b border-gray-100'>
+                      <Text className='text-sm font-medium text-gray-700 mb-3 block'>
+                        {t('探针防御')}
+                      </Text>
+                      <Form.Switch
+                        field='probe_defense_enabled'
+                        label={t('开启探针防御')}
+                        checkedText={t('开')}
+                        uncheckedText={t('关')}
+                        onChange={(value) =>
+                          handleChannelSettingsChange(
+                            'probe_defense_enabled',
+                            value,
+                          )
+                        }
+                        extraText={t('命中高置信探针后转移到隔离目标')}
+                      />
+                      <Form.Input
+                        field='probe_defense_target_url'
+                        label={t('转移目标 URL')}
+                        placeholder='https://example.com'
+                        onChange={(value) =>
+                          handleChannelSettingsChange(
+                            'probe_defense_target_url',
+                            value,
+                          )
+                        }
+                        showClear
+                        extraText={t('可填写根地址或 /v1/messages，后端会自动归一化')}
+                      />
+                      <Form.Input
+                        field='probe_defense_target_api_key'
+                        label={t('转移目标 API Key')}
+                        mode='password'
+                        placeholder={t('留空则保持已保存密钥')}
+                        onChange={(value) =>
+                          handleChannelSettingsChange(
+                            'probe_defense_target_api_key',
+                            value,
+                          )
+                        }
+                        showClear
+                        extraText={t('保存后列表和编辑接口不会明文返回该密钥')}
+                      />
+                    </div>
                   )}
 
                   {inputs.type === 1 && (

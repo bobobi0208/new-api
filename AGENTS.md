@@ -7,7 +7,7 @@ This is an AI API gateway/proxy built with Go. It aggregates 40+ upstream AI pro
 ## Tech Stack
 
 - **Backend**: Go 1.22+, Gin web framework, GORM v2 ORM
-- **Frontend**: React 19, TypeScript, Rsbuild, Base UI, Tailwind CSS
+- **Frontend**: Classic frontend is the active production UI (`web/classic/`, React 18 + Vite + Semi Design). The default frontend (`web/default/`) is deprecated for local product work unless explicitly requested.
 - **Databases**: SQLite, MySQL, PostgreSQL (all three must be supported)
 - **Cache**: Redis (go-redis) + in-memory cache
 - **Auth**: JWT, WebAuthn/Passkeys, OAuth (GitHub, Discord, OIDC, etc.)
@@ -92,13 +92,14 @@ All database code MUST be fully compatible with all three databases simultaneous
 - Ensure all migrations work on all three databases.
 - For SQLite, use `ALTER TABLE ... ADD COLUMN` instead of `ALTER COLUMN` (see `model/main.go` for patterns).
 
-### Rule 3: Frontend — Prefer Bun
+### Rule 3: Frontend — Classic UI Is Canonical
 
-Use `bun` as the preferred package manager and script runner for the frontend (`web/default/` directory):
+The active production frontend is the classic UI under `web/classic/`. For all future business UI changes, channel forms, admin pages, settings pages, and user-facing workflow changes, implement in `web/classic/` first and treat it as the source of truth. Do not add feature work only to `web/default/`; that frontend is deprecated for this deployment and should only receive compatibility fixes when explicitly requested.
+
+Use `bun` as the preferred package manager and script runner for the active frontend (`web/classic/` directory):
 - `bun install` for dependency installation
 - `bun run dev` for development server
 - `bun run build` for production build
-- `bun run i18n:*` for i18n tooling
 
 ### Rule 4: New Channel StreamOptions Support
 
