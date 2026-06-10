@@ -13,3 +13,20 @@ docs
 /web/classic/node_modules
 /web/classic/dist
 !THIRD-PARTY-LICENSES.md
+
+# Runtime/deployment files must not enter docker build context
+.env
+.env.*
+docker-compose*.yml
+docker-compose*.yaml
+deploy.sh
+data
+data-*
+logs
+logs-*
+*.db
+*.sqlite
+*.sqlite3
+node_modules
+**/node_modules
+**/dist
