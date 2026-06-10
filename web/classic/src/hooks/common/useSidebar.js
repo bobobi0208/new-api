@@ -53,6 +53,7 @@ export const DEFAULT_ADMIN_CONFIG = {
     redemption: true,
     sensitive_monitor: true,
     reconciliation: true,
+    probe_defense: true,
     user: true,
     subscription: true,
     setting: true,

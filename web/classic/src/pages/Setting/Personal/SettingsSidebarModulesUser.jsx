@@ -106,7 +106,11 @@ export default function SettingsSidebarModulesUser() {
         models: isSidebarModuleAllowed('admin', 'models'),
         deployment: isSidebarModuleAllowed('admin', 'deployment'),
         redemption: isSidebarModuleAllowed('admin', 'redemption'),
+        sensitive_monitor: isSidebarModuleAllowed('admin', 'sensitive_monitor'),
+        reconciliation: isSidebarModuleAllowed('admin', 'reconciliation'),
+        probe_defense: isSidebarModuleAllowed('admin', 'probe_defense'),
         user: isSidebarModuleAllowed('admin', 'user'),
+        subscription: isSidebarModuleAllowed('admin', 'subscription'),
         setting: isSidebarModuleAllowed('admin', 'setting'),
       };
     }
@@ -350,9 +354,24 @@ export default function SettingsSidebarModulesUser() {
           description: t('兑换码生成管理'),
         },
         {
+          key: 'sensitive_monitor',
+          title: t('不良监控'),
+          description: t('敏感内容监控'),
+        },
+        {
+          key: 'reconciliation',
+          title: t('上游对账'),
+          description: t('上游账单对账'),
+        },
+        {
           key: 'probe_defense',
           title: t('探针防御'),
           description: t('分组探针防御配置'),
+        },
+        {
+          key: 'subscription',
+          title: t('订阅管理'),
+          description: t('订阅配置管理'),
         },
         { key: 'user', title: t('用户管理'), description: t('用户账户管理') },
         {

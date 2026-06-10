@@ -267,29 +267,7 @@ func applyClaudeProbeDefense(c *gin.Context, info *relaycommon.RelayInfo, reques
 		}
 	}
 
-	if !info.ChannelSetting.ProbeDefense.Enabled {
-		return
-	}
-
-	result := probe_defense.MatchClaudeRequest(request)
-	if !result.Matched {
-		return
-	}
-
-	targetURL := probe_defense.NormalizeTargetBaseURL(info.ChannelSetting.ProbeDefense.TargetURL)
-	targetAPIKey := strings.TrimSpace(info.ChannelSetting.ProbeDefense.TargetAPIKey)
-	if targetURL == "" || targetAPIKey == "" {
-		logger.LogWarn(c, fmt.Sprintf(
-			"probe defense matched but target is incomplete: channel_id=%d topic=%s score=%.2f rules=%s",
-			info.ChannelId,
-			result.Topic,
-			result.Score,
-			strings.Join(result.RuleIDs, ","),
-		))
-		return
-	}
-
-	applyProbeDefenseTransfer(c, info, targetURL, targetAPIKey, result, "channel")
+	return
 }
 
 func applyProbeDefenseTransfer(c *gin.Context, info *relaycommon.RelayInfo, targetURL string, targetAPIKey string, result probe_defense.MatchResult, scope string) {
