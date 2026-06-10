@@ -122,7 +122,7 @@ func ProbeDefenseJSONToArray(value string) []string {
 
 func ListProbeDefenseSources() ([]ProbeDefenseSource, error) {
 	var sources []ProbeDefenseSource
-	err := DB.Order("key asc").Find(&sources).Error
+	err := DB.Order("`key` asc").Find(&sources).Error
 	return sources, err
 }
 
@@ -140,7 +140,7 @@ func UpsertProbeDefenseSource(source *ProbeDefenseSource) error {
 		}).Error
 	}
 	var existing ProbeDefenseSource
-	err := DB.Where("key = ?", source.Key).First(&existing).Error
+	err := DB.Where("`key` = ?", source.Key).First(&existing).Error
 	if err == nil {
 		source.ID = existing.ID
 		return UpsertProbeDefenseSource(source)
