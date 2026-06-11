@@ -54,6 +54,39 @@ func TestSeedDefaultProbeDefenseDataIsIdempotent(t *testing.T) {
 	require.NotEmpty(t, signatures)
 }
 
+func TestSeedDefaultProbeDefenseDataCoversKnownProbeTopics(t *testing.T) {
+	setupProbeDefenseTestDB(t)
+
+	require.NoError(t, SeedDefaultProbeDefenseData())
+
+	signatures, err := ListProbeDefenseSignatures("")
+	require.NoError(t, err)
+
+	byTopic := make(map[string][]ProbeDefenseSignature)
+	for _, signature := range signatures {
+		byTopic[signature.Topic] = append(byTopic[signature.Topic], signature)
+	}
+
+	expectedTopics := []string{
+		"tag-echo",
+		"logic-einstein-5houses",
+		"math-1plus1",
+		"websearch-ai-news",
+		"identity-long-thinking",
+		"identity-long-with-poison",
+		"image-ocr-5x7",
+		"pdf-ocr-8char",
+		"long-stream",
+	}
+	for _, topic := range expectedTopics {
+		require.NotEmpty(t, byTopic[topic], "missing default probe signature topic %s", topic)
+	}
+
+	require.Contains(t, byTopic["math-1plus1"][0].Patterns, "1+1")
+	require.Contains(t, byTopic["identity-long-with-poison"][0].Patterns, "1000")
+	require.Contains(t, byTopic["long-stream"][0].Patterns, "max_tokens")
+}
+
 func TestCreateProbeDefenseEvent(t *testing.T) {
 	setupProbeDefenseTestDB(t)
 

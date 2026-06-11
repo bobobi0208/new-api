@@ -58,6 +58,13 @@ function formatTime(value) {
   return new Date(value).toLocaleString();
 }
 
+function formatPatterns(value) {
+  const patterns = parseArray(value);
+  if (patterns.length === 0) return '-';
+  const preview = patterns.slice(0, 3).join(' / ');
+  return patterns.length > 3 ? `${preview} ...` : preview;
+}
+
 function mapPoliciesByGroup(policies) {
   return (policies || []).reduce((acc, item) => {
     acc[item.group_name] = item;
@@ -71,9 +78,11 @@ export default function ProbeDefense() {
   const [signatures, setSignatures] = useState([]);
   const [policies, setPolicies] = useState([]);
   const [events, setEvents] = useState([]);
+  const [recentEvents, setRecentEvents] = useState([]);
   const [eventsTotal, setEventsTotal] = useState(0);
   const [eventsPage, setEventsPage] = useState(1);
   const [selectedGroup, setSelectedGroup] = useState('');
+  const [activeTab, setActiveTab] = useState('policies');
   const [policyForm, setPolicyForm] = useState({
     enabled: false,
     source_keys: [],
@@ -93,6 +102,7 @@ export default function ProbeDefense() {
     topic: '',
     action: '',
   });
+  const [signatureSourceFilter, setSignatureSourceFilter] = useState([]);
   const [testText, setTestText] = useState('');
   const [testSources, setTestSources] = useState([]);
   const [testResult, setTestResult] = useState(null);
@@ -100,6 +110,38 @@ export default function ProbeDefense() {
   const pageSize = 20;
 
   const policyMap = useMemo(() => mapPoliciesByGroup(policies), [policies]);
+  const sourceMap = useMemo(
+    () =>
+      sources.reduce((acc, item) => {
+        acc[item.key] = item;
+        return acc;
+      }, {}),
+    [sources],
+  );
+  const enabledSourceKeys = useMemo(
+    () => sources.filter((item) => item.enabled).map((item) => item.key),
+    [sources],
+  );
+  const enabledSignatureCountBySource = useMemo(
+    () =>
+      signatures.reduce((acc, item) => {
+        const source = sourceMap[item.source_key];
+        if (!item.enabled || !source?.enabled) return acc;
+        acc[item.source_key] = (acc[item.source_key] || 0) + 1;
+        return acc;
+      }, {}),
+    [signatures, sourceMap],
+  );
+  const latestEventByGroup = useMemo(
+    () =>
+      recentEvents.reduce((acc, item) => {
+        if (item.group_name && !acc[item.group_name]) {
+          acc[item.group_name] = item;
+        }
+        return acc;
+      }, {}),
+    [recentEvents],
+  );
   const sourceOptions = useMemo(
     () =>
       sources.map((item) => ({
@@ -111,6 +153,43 @@ export default function ProbeDefense() {
   const groupOptions = useMemo(
     () => groups.map((item) => ({ value: item, label: item })),
     [groups],
+  );
+  const filteredSignatures = useMemo(() => {
+    if (signatureSourceFilter.length === 0) return signatures;
+    const sourceSet = new Set(signatureSourceFilter);
+    return signatures.filter((item) => sourceSet.has(item.source_key));
+  }, [signatures, signatureSourceFilter]);
+  const policyOverviewRows = useMemo(
+    () =>
+      groups.map((group) => {
+        const policy = policyMap[group];
+        const sourceKeys = parseArray(policy?.source_keys);
+        const effectiveSourceKeys =
+          sourceKeys.length > 0 ? sourceKeys : enabledSourceKeys;
+        const ruleCount = effectiveSourceKeys.reduce(
+          (sum, key) => sum + (enabledSignatureCountBySource[key] || 0),
+          0,
+        );
+        return {
+          group_name: group,
+          policy,
+          enabled: !!policy?.enabled,
+          source_keys: sourceKeys,
+          effective_source_keys: effectiveSourceKeys,
+          rule_count: ruleCount,
+          target_url: policy?.target_url || '',
+          has_api_key: policy?.target_api_key === API_KEY_MASK,
+          log_only: !!policy?.log_only,
+          latest_event: latestEventByGroup[group],
+        };
+      }),
+    [
+      groups,
+      policyMap,
+      enabledSourceKeys,
+      enabledSignatureCountBySource,
+      latestEventByGroup,
+    ],
   );
 
   const syncPolicyForm = (group, list = policies) => {
@@ -127,20 +206,26 @@ export default function ProbeDefense() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [groupRes, sourceRes, signatureRes, policyRes] = await Promise.all([
-        API.get('/api/group/'),
-        API.get('/api/probe_defense/sources'),
-        API.get('/api/probe_defense/signatures'),
-        API.get('/api/probe_defense/policies'),
-      ]);
+      const [groupRes, sourceRes, signatureRes, policyRes, recentEventRes] =
+        await Promise.all([
+          API.get('/api/group/'),
+          API.get('/api/probe_defense/sources'),
+          API.get('/api/probe_defense/signatures'),
+          API.get('/api/probe_defense/policies'),
+          API.get('/api/probe_defense/events', {
+            params: { p: 1, page_size: 200 },
+          }),
+        ]);
       const nextGroups = groupRes.data?.data || [];
       const nextSources = sourceRes.data?.data || [];
       const nextSignatures = signatureRes.data?.data || [];
       const nextPolicies = policyRes.data?.data || [];
+      const nextRecentEvents = recentEventRes.data?.data?.items || [];
       setGroups(nextGroups);
       setSources(nextSources);
       setSignatures(nextSignatures);
       setPolicies(nextPolicies);
+      setRecentEvents(nextRecentEvents);
       const group = selectedGroup || nextGroups[0] || '';
       setSelectedGroup(group);
       syncPolicyForm(group, nextPolicies);
@@ -298,6 +383,11 @@ export default function ProbeDefense() {
     { title: '主题', dataIndex: 'topic' },
     { title: '匹配方式', dataIndex: 'match_type' },
     {
+      title: '特征摘要',
+      dataIndex: 'patterns',
+      render: formatPatterns,
+    },
+    {
       title: '状态',
       render: (_, record) => (
         <Tag color={record.enabled ? 'green' : 'grey'}>
@@ -318,6 +408,107 @@ export default function ProbeDefense() {
             onClick={() => deleteSignature(record)}
           >
             删除
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  const policyOverviewColumns = [
+    { title: '分组', dataIndex: 'group_name' },
+    {
+      title: '状态',
+      render: (_, record) => (
+        <Tag color={record.enabled ? 'green' : 'grey'}>
+          {record.enabled ? '启用' : '未启用'}
+        </Tag>
+      ),
+    },
+    {
+      title: '动作模式',
+      render: (_, record) => {
+        if (!record.enabled) return <Tag color='grey'>未启用</Tag>;
+        return (
+          <Tag color={record.log_only ? 'blue' : 'orange'}>
+            {record.log_only ? '仅记录' : '转移'}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: '防御来源',
+      render: (_, record) => {
+        if (record.source_keys.length === 0) {
+          return <Tag color='cyan'>全部启用来源</Tag>;
+        }
+        const visibleKeys = record.source_keys.slice(0, 3);
+        return (
+          <Space wrap>
+            {visibleKeys.map((key) => (
+              <Tag key={key}>{sourceMap[key]?.name || key}</Tag>
+            ))}
+            {record.source_keys.length > visibleKeys.length && (
+              <Tag>+{record.source_keys.length - visibleKeys.length}</Tag>
+            )}
+          </Space>
+        );
+      },
+    },
+    { title: '规则数量', dataIndex: 'rule_count' },
+    {
+      title: '目标 URL',
+      render: (_, record) => {
+        if (record.log_only) return '-';
+        return record.target_url || <Text type='danger'>未配置</Text>;
+      },
+    },
+    {
+      title: 'API Key',
+      render: (_, record) => {
+        if (record.log_only) return '-';
+        return (
+          <Tag color={record.has_api_key ? 'green' : 'red'}>
+            {record.has_api_key ? '已配置' : '未配置'}
+          </Tag>
+        );
+      },
+    },
+    {
+      title: '最近命中',
+      render: (_, record) => {
+        const event = record.latest_event;
+        if (!event) return '-';
+        return (
+          <div>
+            <div>{formatTime(event.created_at)}</div>
+            <Text type='tertiary'>
+              {event.source_key || '-'} / {event.topic || '-'}
+            </Text>
+          </div>
+        );
+      },
+    },
+    {
+      title: '操作',
+      render: (_, record) => (
+        <Space>
+          <Button
+            size='small'
+            onClick={() => {
+              setSelectedGroup(record.group_name);
+              syncPolicyForm(record.group_name);
+            }}
+          >
+            编辑
+          </Button>
+          <Button
+            size='small'
+            onClick={() => {
+              setSignatureSourceFilter(record.effective_source_keys);
+              setActiveTab('signatures');
+            }}
+          >
+            查看规则
           </Button>
         </Space>
       ),
@@ -348,9 +539,15 @@ export default function ProbeDefense() {
               刷新配置
             </Button>
           </Space>
-          <Tabs type='line'>
+          <Tabs type='line' activeKey={activeTab} onChange={setActiveTab}>
             <Tabs.TabPane tab='分组策略' itemKey='policies'>
               <Space vertical align='start' style={{ width: '100%' }}>
+                <Table
+                  rowKey='group_name'
+                  columns={policyOverviewColumns}
+                  dataSource={policyOverviewRows}
+                  pagination={false}
+                />
                 <Select
                   value={selectedGroup}
                   optionList={groupOptions}
@@ -431,17 +628,30 @@ export default function ProbeDefense() {
             </Tabs.TabPane>
             <Tabs.TabPane tab='特征规则' itemKey='signatures'>
               <Space vertical align='start' style={{ width: '100%' }}>
-                <Button
-                  icon={<IconPlus />}
-                  type='primary'
-                  onClick={() => openSignatureModal()}
-                >
-                  新增规则
-                </Button>
+                <Space wrap>
+                  <Select
+                    multiple
+                    value={signatureSourceFilter}
+                    optionList={sourceOptions}
+                    style={{ minWidth: 260 }}
+                    placeholder='按来源过滤规则'
+                    onChange={setSignatureSourceFilter}
+                  />
+                  <Button onClick={() => setSignatureSourceFilter([])}>
+                    清除过滤
+                  </Button>
+                  <Button
+                    icon={<IconPlus />}
+                    type='primary'
+                    onClick={() => openSignatureModal()}
+                  >
+                    新增规则
+                  </Button>
+                </Space>
                 <Table
                   rowKey='id'
                   columns={signatureColumns}
-                  dataSource={signatures}
+                  dataSource={filteredSignatures}
                   pagination={false}
                 />
               </Space>

@@ -291,9 +291,15 @@ func SeedDefaultProbeDefenseData() error {
 	defaults := []ProbeDefenseSignature{
 		defaultProbeSignature("tag echo", "cctest", "claude_messages", "tag-echo", "contains_all", []string{"return exactly", "tag-"}),
 		defaultProbeSignature("einstein five houses", "cctest", "claude_messages", "logic-einstein-5houses", "contains_all", []string{"五座颜色不同的房子", "谁养鱼"}),
+		defaultProbeSignature("math one plus one", "cctest", "claude_messages", "math-1plus1", "contains_any", []string{"1+1", "1 + 1"}),
 		defaultProbeSignature("ai news web search", "cctest", "claude_messages", "websearch-ai-news", "contains_all", []string{"ai news", "web_search"}),
+		defaultProbeSignature("ai news web search zh", "cctest", "claude_messages", "websearch-ai-news", "contains_all", []string{"ai 新闻", "web_search"}),
 		defaultProbeSignature("identity conflict", "cctest", "claude_messages", "identity-conflict", "contains_any", []string{"多重身份", "claude code", "kiro", "warp", "antigravity"}),
-		defaultProbeSignature("ocr probe", "cctest", "claude_messages", "ocr", "contains_any", []string{"ocr", "短码", "pdf ocr", "image ocr"}),
+		defaultProbeSignature("identity long thinking", "cctest", "claude_messages", "identity-long-thinking", "contains_all", []string{"身份", "1000", "瓶", "药"}),
+		defaultProbeSignature("identity long with poison", "cctest", "claude_messages", "identity-long-with-poison", "contains_all", []string{"1000", "瓶", "药", "毒"}),
+		defaultProbeSignature("image ocr 5x7", "cctest", "claude_messages", "image-ocr-5x7", "contains_any", []string{"5x7", "image ocr", "图片 ocr", "短码"}),
+		defaultProbeSignature("pdf ocr 8char", "cctest", "claude_messages", "pdf-ocr-8char", "contains_any", []string{"8char", "8 字符", "pdf ocr", "pdf 短码"}),
+		defaultProbeSignature("long stream high max tokens", "cctest", "claude_messages", "long-stream", "contains_any", []string{"max_tokens", "长流", "long stream", "stream"}),
 	}
 	for i := range defaults {
 		var existing ProbeDefenseSignature
